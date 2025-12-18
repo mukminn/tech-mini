@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_URL || "https://tech-mini-kappa.vercel.app";
   
   return {
-    title: "Base Pulse",
+    title: "Base Pulse daily onchain",
     description: "Daily onchain actions with badges",
     icons: {
       icon: "/blue-icon.png",
@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
         version: minikitConfig.miniapp.version,
         imageUrl: minikitConfig.miniapp.heroImageUrl,
         button: {
-          title: `Join the ${minikitConfig.miniapp.name} Waitlist`,
+          title: `Launch ${minikitConfig.miniapp.name}`,
           action: {
             name: `Launch ${minikitConfig.miniapp.name}`,
             type: "launch_frame",
@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     metadataBase: new URL(baseUrl),
     openGraph: {
-      title: "Base Pulse",
+      title: "Base Pulse daily onchain",
       description: "Daily onchain actions with badges",
       url: "https://tech-mini-kappa.vercel.app",
       siteName: "Base Pulse",

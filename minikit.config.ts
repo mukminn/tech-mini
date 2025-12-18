@@ -18,7 +18,7 @@ export const minikitConfig = {
     name: "Base Pulse", 
     subtitle: "Daily onchain actions with badges", 
     description: "Daily onchain actions with badges",
-    screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
+    screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`, `${ROOT_URL}/screenshot.png`],
     iconUrl: `${ROOT_URL}/icon.png`,
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#000000",

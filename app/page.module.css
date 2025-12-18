@@ -6,6 +6,29 @@
   color: var(--foreground);
   padding: 1.5rem;
   padding-bottom: calc(1.5rem + 80px); /* Space for bottom nav */
+  position: relative;
+  overflow: hidden;
+}
+
+.decorativeSphere {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 0;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+  }
 }
 
 .content {
@@ -16,12 +39,23 @@
   width: 100%;
   margin: 0 auto;
   gap: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .header {
   text-align: center;
   width: 100%;
   margin-bottom: 1rem;
+  position: relative;
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  display: block;
+  object-fit: contain;
 }
 
 .greeting {
