@@ -1,13 +1,22 @@
 @layer base {
   :root {
+    /* Base Blue Theme */
+    --base-blue: #0052FF;
+    --base-blue-hover: #0040CC;
+    --base-blue-light: #E6F0FF;
     --background: #ffffff;
     --foreground: #171717;
+    --surface: #f8f9fa;
+    --border: #e5e7eb;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
       --background: #0a0a0a;
       --foreground: #ededed;
+      --surface: #1a1a1a;
+      --border: #333333;
+      --base-blue-light: rgba(0, 82, 255, 0.1);
     }
   }
 
@@ -56,5 +65,16 @@
     html {
       color-scheme: dark;
     }
+  }
+
+  /* Base Mini App specific styles */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Smooth transitions */
+  * {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
 }

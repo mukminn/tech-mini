@@ -3,12 +3,18 @@ import { Inter, Source_Code_Pro } from "next/font/google";
 import { SafeArea } from "@coinbase/onchainkit/minikit";
 import { minikitConfig } from "../minikit.config";
 import { RootProvider } from "./rootProvider";
+import { BottomNav } from "./components/BottomNav";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://tech-mini-kappa.vercel.app";
+  
   return {
-    title: minikitConfig.miniapp.name,
-    description: minikitConfig.miniapp.description,
+    title: "Base Pulse",
+    description: "Daily onchain actions with badges",
+    icons: {
+      icon: "/blue-icon.png",
+    },
     other: {
       "fc:frame": JSON.stringify({
         version: minikitConfig.miniapp.version,
@@ -21,6 +27,27 @@ export async function generateMetadata(): Promise<Metadata> {
           },
         },
       }),
+      "base:app_id": "693b0f4c8a7c4e55fec73e83",
+    },
+    metadataBase: new URL(baseUrl),
+    openGraph: {
+      title: "Base Pulse",
+      description: "Daily onchain actions with badges",
+      url: "https://tech-mini-kappa.vercel.app",
+      siteName: "Base Pulse",
+      images: [
+        {
+          url: `${baseUrl}/blue-hero.png`,
+          width: 1200,
+          height: 630,
+          alt: "Base Pulse OG Image",
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [`${baseUrl}/blue-hero.png`],
     },
   };
 }
@@ -44,7 +71,10 @@ export default function RootLayout({
     <RootProvider>
       <html lang="en">
         <body className={`${inter.variable} ${sourceCodePro.variable}`}>
-          <SafeArea>{children}</SafeArea>
+          <SafeArea>
+            {children}
+            <BottomNav />
+          </SafeArea>
         </body>
       </html>
     </RootProvider>

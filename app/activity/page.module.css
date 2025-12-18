@@ -1,0 +1,103 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+  background: var(--background);
+  color: var(--foreground);
+  padding: 1.5rem;
+  padding-bottom: calc(1.5rem + 80px);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--foreground);
+  opacity: 0.7;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--foreground);
+  opacity: 0.6;
+}
+
+.emptySubtext {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  opacity: 0.5;
+}
+
+.timeline {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timelineItem {
+  position: relative;
+  padding-left: 3rem;
+  padding-bottom: 2rem;
+  min-height: 44px;
+}
+
+.timelineDot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  min-width: 44px;
+  background: var(--surface);
+  border: 2px solid var(--base-blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  z-index: 1;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 21px;
+  top: 44px;
+  width: 2px;
+  height: calc(100% - 44px);
+  background: var(--border);
+  z-index: 0;
+}
+
+.timelineContent {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  min-height: 44px;
+}
+
+.activityMessage {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+}
+
+.activityDate {
+  font-size: 0.875rem;
+  color: var(--foreground);
+  opacity: 0.6;
+}

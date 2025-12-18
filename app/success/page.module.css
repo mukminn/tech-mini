@@ -14,8 +14,10 @@
   background: none;
   border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -135,23 +137,24 @@
 }
 
 .shareButton {
-  background: #f7d954;
-  color: #000;
+  background: var(--base-blue);
+  color: white;
   border: none;
   padding: 1rem 3rem;
   font-size: 1rem;
   font-weight: 700;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  text-transform: none;
+  letter-spacing: 0;
   margin-top: 1rem;
-  box-shadow: 0 4px 20px rgba(247, 217, 84, 0.3);
+  min-height: 56px; /* 44px minimum + padding */
+  box-shadow: 0 4px 12px rgba(0, 82, 255, 0.3);
 }
 
 .shareButton:hover {
-  background: #f5d73a;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(247, 217, 84, 0.4);
+  background: var(--base-blue-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 82, 255, 0.4);
 }
