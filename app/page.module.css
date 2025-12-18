@@ -47,15 +47,6 @@
   text-align: center;
   width: 100%;
   margin-bottom: 1rem;
-  position: relative;
-}
-
-.logo {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 1rem;
-  display: block;
-  object-fit: contain;
 }
 
 .greeting {
