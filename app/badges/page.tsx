@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI, BADGE_IDS } from "../../lib/contract";
@@ -101,20 +101,20 @@ export default function BadgesPage() {
       </div>
 
       <div className={styles.badgesGrid}>
-        {badges.map((badge) => (
+        {badges.map((badge, index) => (
           <div
             key={badge.id}
-            className={`${styles.badgeCard} ${badge.unlocked ? styles.unlocked : styles.locked}`}
+            className={`${styles.badgeCard} ${badge.unlocked ? styles.unlocked : styles.locked}`} style={{ "--index": index } as React.CSSProperties}
           >
             <div className={styles.badgeIcon}>
               {badge.unlocked ? (
                 badge.image ? (
                   <img src={badge.image} alt={badge.name} className={styles.badgeImage} />
                 ) : (
-                  <div className={styles.badgeIconUnlocked}>🏆</div>
+                  <div className={styles.badgeIconUnlocked}>ðŸ†</div>
                 )
               ) : (
-                <div className={styles.badgeIconLocked}>🔒</div>
+                <div className={styles.badgeIconLocked}>ðŸ”’</div>
               )}
             </div>
             <h3 className={styles.badgeName}>{badge.name}</h3>
@@ -131,3 +131,4 @@ export default function BadgesPage() {
     </div>
   );
 }
+

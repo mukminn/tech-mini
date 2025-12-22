@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import styles from "./page.module.css";
@@ -89,9 +89,9 @@ export default function ActivityPage() {
 
       <div className={styles.timeline}>
         {activities.map((activity, index) => (
-          <div key={activity.id} className={styles.timelineItem}>
+          <div key={activity.id} className={styles.timelineItem} style={{ "--index": index } as React.CSSProperties}>
             <div className={styles.timelineDot}>
-              {activity.type === "badge" ? "🏆" : "✓"}
+              {activity.type === "badge" ? "ðŸ†" : "âœ“"}
             </div>
             <div className={styles.timelineContent}>
               <p className={styles.activityMessage}>{activity.message}</p>
@@ -106,3 +106,4 @@ export default function ActivityPage() {
     </div>
   );
 }
+
