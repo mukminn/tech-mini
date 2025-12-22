@@ -158,7 +158,6 @@ export default function Home() {
       <img src="/sphere.png" alt="" className={styles.decorativeSphere} aria-hidden="true" />
       <div className={styles.content}>
         <div className={styles.header}>
-          <img src="/logo.png" alt="Base Pulse Logo" className={styles.logo} />
           <h1 className={styles.greeting}>
             Hey {context?.user?.displayName || "there"}! 👋
           </h1>
