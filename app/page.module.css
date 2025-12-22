@@ -14,54 +14,102 @@
 
 .decorativeSphere {
   position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 200px;
-  height: 200px;
-  opacity: 0.15;
+  top: -80px;
+  right: -80px;
+  width: 350px;
+  height: 350px;
+  opacity: 0.25;
   pointer-events: none;
   z-index: 0;
   animation: float 6s ease-in-out infinite;
-  filter: blur(20px);
 }
 
 .decorativeSphere2 {
   position: absolute;
-  top: -30px;
-  left: -30px;
-  width: 150px;
-  height: 150px;
-  opacity: 0.12;
+  top: -60px;
+  left: -60px;
+  width: 300px;
+  height: 300px;
+  opacity: 0.22;
   pointer-events: none;
   z-index: 0;
   animation: floatReverse 8s ease-in-out infinite;
-  filter: blur(15px);
 }
 
 .decorativeSphere3 {
   position: absolute;
-  bottom: -40px;
-  right: -40px;
-  width: 180px;
-  height: 180px;
-  opacity: 0.13;
+  bottom: -70px;
+  right: -70px;
+  width: 320px;
+  height: 320px;
+  opacity: 0.23;
   pointer-events: none;
   z-index: 0;
   animation: floatSlow 10s ease-in-out infinite;
-  filter: blur(18px);
 }
 
 .decorativeSphere4 {
   position: absolute;
-  bottom: -50px;
-  left: -50px;
-  width: 160px;
-  height: 160px;
-  opacity: 0.14;
+  bottom: -80px;
+  left: -80px;
+  width: 280px;
+  height: 280px;
+  opacity: 0.24;
   pointer-events: none;
   z-index: 0;
   animation: floatFast 7s ease-in-out infinite;
-  filter: blur(16px);
+}
+
+.decorativeSphere5 {
+  position: absolute;
+  top: 50%;
+  right: -100px;
+  width: 250px;
+  height: 250px;
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 0;
+  animation: float 9s ease-in-out infinite;
+  transform: translateY(-50%);
+}
+
+.decorativeSphere6 {
+  position: absolute;
+  top: 50%;
+  left: -100px;
+  width: 270px;
+  height: 270px;
+  opacity: 0.21;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatReverse 11s ease-in-out infinite;
+  transform: translateY(-50%);
+}
+
+.decorativeSphere7 {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  width: 260px;
+  height: 260px;
+  opacity: 0.19;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatSlow 8s ease-in-out infinite;
+  transform: translateX(-50%);
+}
+
+.decorativeSphere8 {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  width: 290px;
+  height: 290px;
+  opacity: 0.22;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatFast 12s ease-in-out infinite;
+  transform: translateX(-50%);
 }
 
 @keyframes float {
