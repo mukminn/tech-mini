@@ -156,6 +156,9 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <img src="/sphere.png" alt="" className={styles.decorativeSphere} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere2} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere3} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere4} aria-hidden="true" />
       <div className={styles.content}>
         <div className={styles.header}>
           <h1 className={styles.greeting}>

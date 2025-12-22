@@ -35,19 +35,19 @@ export function AnimatedBackground() {
     window.addEventListener("resize", resizeCanvas);
 
     // Physics constants
-    const BOUNCE_DAMPING = 0.95; // Minimal energy loss on bounce
+    const BOUNCE_DAMPING = 0.95;
     const BASE_RADIUS = 15;
-    const PARTICLE_COUNT = 50; // 50 bola seperti yang diminta
+    const PARTICLE_COUNT = 50; // 50 bola
 
-    // Initialize particles - random positions and velocities
+    // Initialize particles
     const initParticles = () => {
       particlesRef.current = [];
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         particlesRef.current.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 3, // Random horizontal velocity
-          vy: (Math.random() - 0.5) * 3, // Random vertical velocity
+          vx: (Math.random() - 0.5) * 3,
+          vy: (Math.random() - 0.5) * 3,
           radius: BASE_RADIUS + Math.random() * 10,
           opacity: 0.4 + Math.random() * 0.4,
           glowIntensity: 0.6 + Math.random() * 0.4,
@@ -61,7 +61,7 @@ export function AnimatedBackground() {
       const deltaTime = currentTime - lastTimeRef.current;
       lastTimeRef.current = currentTime;
 
-      // Clear canvas with slight fade for trail effect
+      // Clear canvas with fade
       const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       ctx.fillStyle = isDark ? "rgba(10, 10, 10, 0.1)" : "rgba(255, 255, 255, 0.08)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -72,31 +72,25 @@ export function AnimatedBackground() {
         particle.x += particle.vx;
         particle.y += particle.vy;
 
-        // Bounce off top edge
+        // Bounce off edges
         if (particle.y - particle.radius <= 0) {
           particle.y = particle.radius;
           particle.vy *= -BOUNCE_DAMPING;
         }
-
-        // Bounce off bottom edge
         if (particle.y + particle.radius >= canvas.height) {
           particle.y = canvas.height - particle.radius;
           particle.vy *= -BOUNCE_DAMPING;
         }
-
-        // Bounce off left edge
         if (particle.x - particle.radius <= 0) {
           particle.x = particle.radius;
           particle.vx *= -BOUNCE_DAMPING;
         }
-
-        // Bounce off right edge
         if (particle.x + particle.radius >= canvas.width) {
           particle.x = canvas.width - particle.radius;
           particle.vx *= -BOUNCE_DAMPING;
         }
 
-        // Draw particle with glow effect - Blue neon
+        // Draw particle with blue neon glow
         const gradient = ctx.createRadialGradient(
           particle.x,
           particle.y,
@@ -106,7 +100,6 @@ export function AnimatedBackground() {
           particle.radius * 2.5
         );
 
-        // Neon Blue colors
         const baseColor = `rgba(0, 150, 255, ${particle.opacity})`;
         const glowColor = `rgba(0, 100, 255, ${particle.opacity * particle.glowIntensity * 0.4})`;
         const outerGlow = `rgba(0, 150, 255, ${particle.opacity * 0.1})`;

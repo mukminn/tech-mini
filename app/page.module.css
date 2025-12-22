@@ -18,18 +18,94 @@
   right: -50px;
   width: 200px;
   height: 200px;
-  opacity: 0.1;
+  opacity: 0.15;
   pointer-events: none;
   z-index: 0;
   animation: float 6s ease-in-out infinite;
+  filter: blur(20px);
+}
+
+.decorativeSphere2 {
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  width: 150px;
+  height: 150px;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatReverse 8s ease-in-out infinite;
+  filter: blur(15px);
+}
+
+.decorativeSphere3 {
+  position: absolute;
+  bottom: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  opacity: 0.13;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatSlow 10s ease-in-out infinite;
+  filter: blur(18px);
+}
+
+.decorativeSphere4 {
+  position: absolute;
+  bottom: -50px;
+  left: -50px;
+  width: 160px;
+  height: 160px;
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatFast 7s ease-in-out infinite;
+  filter: blur(16px);
 }
 
 @keyframes float {
   0%, 100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0) rotate(0deg) scale(1);
   }
   50% {
-    transform: translateY(-20px) rotate(180deg);
+    transform: translateY(-20px) rotate(180deg) scale(1.1);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(15px) rotate(-180deg) scale(0.9);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translateY(-15px) rotate(120deg) scale(1.05);
+  }
+  66% {
+    transform: translateY(10px) rotate(240deg) scale(0.95);
+  }
+}
+
+@keyframes floatFast {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-10px) rotate(90deg) scale(1.08);
+  }
+  50% {
+    transform: translateY(5px) rotate(180deg) scale(0.92);
+  }
+  75% {
+    transform: translateY(-5px) rotate(270deg) scale(1.05);
   }
 }
 
