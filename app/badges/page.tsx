@@ -114,7 +114,7 @@ export default function BadgesPage() {
                   <div className={styles.badgeIconUnlocked}>ðŸ†</div>
                 )
               ) : (
-                <div className={styles.badgeIconLocked}>ðŸ”’</div>
+                <div className={styles.badgeIconLocked}>🔒</div>
               )}
             </div>
             <h3 className={styles.badgeName}>{badge.name}</h3>

@@ -159,7 +159,7 @@ export default function Home() {
       <div className={styles.content}>
         <div className={styles.header}>
           <h1 className={styles.greeting}>
-            Hey {context?.user?.displayName || "there"}! 👋
+            Hey {context?.user?.displayName || "there"}!
           </h1>
           <p className={styles.subtitle}>Complete your daily check-in</p>
         </div>
