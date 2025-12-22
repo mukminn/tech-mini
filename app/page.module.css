@@ -2,11 +2,13 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 80px); /* Account for bottom nav */
-  background: var(--background);
+  background: var(--background) !important;
   color: var(--foreground);
   padding: 1.5rem;
   padding-bottom: calc(1.5rem + 80px); /* Space for bottom nav */
   position: relative;
+  z-index: 10 !important;
+  isolation: isolate;
   overflow: hidden;
 }
 
