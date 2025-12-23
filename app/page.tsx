@@ -21,34 +21,40 @@ export default function Home() {
     }
   }, [setFrameReady, isFrameReady]);
 
-  // Read contract state
-  const { data: canCheckInToday } = useReadContract({
+  // Read contract state with refetch interval
+  const { data: canCheckInToday, refetch: refetchCanCheckIn } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "canCheckInToday",
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
+      refetchInterval: 10000, // Refetch every 10 seconds
+      refetchOnWindowFocus: true,
     },
   });
 
-  const { data: contractStreak } = useReadContract({
+  const { data: contractStreak, refetch: refetchStreak } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "getStreak",
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
+      refetchInterval: 10000, // Refetch every 10 seconds
+      refetchOnWindowFocus: true,
     },
   });
 
-  const { data: lastCheckInTimestamp } = useReadContract({
+  const { data: lastCheckInTimestamp, refetch: refetchLastCheckIn } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "lastCheckInDay",
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
+      refetchInterval: 10000, // Refetch every 10 seconds
+      refetchOnWindowFocus: true,
     },
   });
 
@@ -65,31 +71,46 @@ export default function Home() {
   // Update local state from contract
   useEffect(() => {
     if (address) {
-      // Always update canCheckIn, even if false
+      // Always update canCheckIn, even if false (for new users, this will be true)
       if (canCheckInToday !== undefined && typeof canCheckInToday === 'boolean') {
         setCanCheckIn(canCheckInToday);
+      } else {
+        // For new users, default to true (can check in)
+        setCanCheckIn(true);
       }
       
-      // Always update streak, even if 0
+      // Always update streak - handle both 0 and undefined for new users
       if (contractStreak !== undefined && contractStreak !== null) {
         const newStreak = Number(contractStreak);
-        setPreviousStreak(streak);
+        // Only update previousStreak if streak actually changed
+        if (newStreak !== streak) {
+          setPreviousStreak(streak);
+        }
         setStreak(newStreak);
       } else {
-        // If no streak data yet, set to 0
+        // For new users, set to 0 explicitly
         setStreak(0);
+        setPreviousStreak(0);
       }
       
       // Update last check-in date
-      if (lastCheckInTimestamp !== undefined && lastCheckInTimestamp !== null && Number(lastCheckInTimestamp) > 0) {
-        const timestamp = Number(lastCheckInTimestamp) * 1000; // Convert to milliseconds
-        setLastCheckIn(new Date(timestamp));
+      if (lastCheckInTimestamp !== undefined && lastCheckInTimestamp !== null) {
+        const timestampValue = Number(lastCheckInTimestamp);
+        if (timestampValue > 0) {
+          const timestamp = timestampValue * 1000; // Convert to milliseconds
+          setLastCheckIn(new Date(timestamp));
+        } else {
+          // For new users, no last check-in
+          setLastCheckIn(null);
+        }
       } else {
+        // For new users, no last check-in
         setLastCheckIn(null);
       }
     } else {
       // Reset when no address
       setStreak(0);
+      setPreviousStreak(0);
       setLastCheckIn(null);
       setCanCheckIn(false);
     }
@@ -97,8 +118,24 @@ export default function Home() {
     // Update fee (always, not dependent on address)
     if (fee !== undefined && fee !== null) {
       setCheckInFee(BigInt(fee.toString()));
+    } else {
+      // Default fee if not loaded yet
+      setCheckInFee(BigInt(0));
     }
-  }, [address, canCheckInToday, contractStreak, lastCheckInTimestamp, fee, streak]);
+  }, [address, canCheckInToday, contractStreak, lastCheckInTimestamp, fee]);
+
+  // Force refetch when address changes
+  useEffect(() => {
+    if (address) {
+      // Small delay to ensure wallet is connected
+      const timer = setTimeout(() => {
+        refetchCanCheckIn();
+        refetchStreak();
+        refetchLastCheckIn();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [address, refetchCanCheckIn, refetchStreak, refetchLastCheckIn]);
 
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({

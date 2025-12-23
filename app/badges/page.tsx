@@ -25,62 +25,81 @@ export default function BadgesPage() {
   const [badges, setBadges] = useState<Badge[]>(BADGES);
   const [streak, setStreak] = useState(0);
 
-  // Read streak from contract
-  const { data: contractStreak } = useReadContract({
+  // Read streak from contract with refetch
+  const { data: contractStreak, refetch: refetchStreak } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "getStreak",
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
+      refetchInterval: 10000, // Refetch every 10 seconds
+      refetchOnWindowFocus: true,
     },
   });
 
-  // Read badge balances from contract
-  const { data: badge1 } = useReadContract({
+  // Read badge balances from contract with refetch
+  const { data: badge1, refetch: refetchBadge1 } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "balanceOf",
     args: address ? [address, BADGE_IDS.DAY_1] : undefined,
-    query: { enabled: !!address },
+    query: { 
+      enabled: !!address,
+      refetchInterval: 10000,
+      refetchOnWindowFocus: true,
+    },
   });
 
-  const { data: badge3 } = useReadContract({
+  const { data: badge3, refetch: refetchBadge3 } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "balanceOf",
     args: address ? [address, BADGE_IDS.DAY_3] : undefined,
-    query: { enabled: !!address },
+    query: { 
+      enabled: !!address,
+      refetchInterval: 10000,
+      refetchOnWindowFocus: true,
+    },
   });
 
-  const { data: badge7 } = useReadContract({
+  const { data: badge7, refetch: refetchBadge7 } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "balanceOf",
     args: address ? [address, BADGE_IDS.DAY_7] : undefined,
-    query: { enabled: !!address },
+    query: { 
+      enabled: !!address,
+      refetchInterval: 10000,
+      refetchOnWindowFocus: true,
+    },
   });
 
-  const { data: badge14 } = useReadContract({
+  const { data: badge14, refetch: refetchBadge14 } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "balanceOf",
     args: address ? [address, BADGE_IDS.DAY_14] : undefined,
-    query: { enabled: !!address },
+    query: { 
+      enabled: !!address,
+      refetchInterval: 10000,
+      refetchOnWindowFocus: true,
+    },
   });
 
   useEffect(() => {
     if (address) {
-      // Always update streak, even if it's 0 or undefined
+      // Always update streak, even if it's 0 or undefined (for new users)
       if (contractStreak !== undefined && contractStreak !== null) {
         const streakCount = Number(contractStreak);
         setStreak(streakCount);
       } else {
+        // For new users, explicitly set to 0
         setStreak(0);
       }
 
       // Update badge unlock status based on contract balances
-      // This should run even if badge data is still loading
+      // This should run even if badge data is still loading (will be false for new users)
       setBadges(BADGES.map((badge, index) => {
         let hasBadge = false;
         const checkBadge = (value: unknown): boolean => {
@@ -109,18 +128,20 @@ export default function BadgesPage() {
     }
   }, [address, contractStreak, badge1, badge3, badge7, badge14]);
 
-  // Refresh badge data periodically to catch updates
+  // Force refetch when address changes
   useEffect(() => {
     if (address) {
-      const interval = setInterval(() => {
-        // Force re-render by updating a dummy state
-        // The useReadContract hooks will automatically refetch
-        window.dispatchEvent(new Event('focus'));
-      }, 5000); // Check every 5 seconds
-
-      return () => clearInterval(interval);
+      // Small delay to ensure wallet is connected
+      const timer = setTimeout(() => {
+        refetchStreak();
+        refetchBadge1();
+        refetchBadge3();
+        refetchBadge7();
+        refetchBadge14();
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [address]);
+  }, [address, refetchStreak, refetchBadge1, refetchBadge3, refetchBadge7, refetchBadge14]);
 
   return (
     <div className={styles.container}>
