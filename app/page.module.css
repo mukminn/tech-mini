@@ -269,6 +269,30 @@
   transition: width 0.3s ease;
 }
 
+.feeInfo {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.feeLabel {
+  font-size: 0.875rem;
+  color: var(--foreground);
+  opacity: 0.7;
+  margin-bottom: 0.25rem;
+}
+
+.feeAmount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--base-blue);
+  margin: 0;
+}
+
 .checkInButton {
   width: 100%;
   min-height: 56px; /* 44px minimum + padding */

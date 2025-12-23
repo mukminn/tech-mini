@@ -12,6 +12,7 @@ export default function Home() {
   const [lastCheckIn, setLastCheckIn] = useState<Date | null>(null);
   const [canCheckIn, setCanCheckIn] = useState(false);
   const [previousStreak, setPreviousStreak] = useState(0);
+  const [checkInFee, setCheckInFee] = useState<bigint>(0n);
 
   // Initialize the miniapp
   useEffect(() => {
@@ -51,6 +52,16 @@ export default function Home() {
     },
   });
 
+  // Read check-in fee
+  const { data: fee } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: "getCheckInFee",
+    query: {
+      enabled: true,
+    },
+  });
+
   // Update local state from contract
   useEffect(() => {
     if (address) {
@@ -67,7 +78,11 @@ export default function Home() {
         setLastCheckIn(new Date(timestamp));
       }
     }
-  }, [address, canCheckInToday, contractStreak, lastCheckInTimestamp]);
+    // Update fee
+    if (fee !== undefined && fee !== null) {
+      setCheckInFee(BigInt(fee.toString()));
+    }
+  }, [address, canCheckInToday, contractStreak, lastCheckInTimestamp, fee]);
 
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -82,6 +97,7 @@ export default function Home() {
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
         functionName: "checkIn",
+        value: checkInFee,
         gas: undefined, // Let OnchainKit handle gas sponsorship
       });
     } catch (error) {
@@ -194,6 +210,15 @@ export default function Home() {
                 style={{ width: `${(streak / nextBadge.day) * 100}%` }}
               />
             </div>
+          </div>
+        )}
+
+        {checkInFee > 0n && (
+          <div className={styles.feeInfo}>
+            <p className={styles.feeLabel}>Check-in Fee:</p>
+            <p className={styles.feeAmount}>
+              {(Number(checkInFee) / 1e18).toFixed(4)} ETH
+            </p>
           </div>
         )}
 

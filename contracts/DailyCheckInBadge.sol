@@ -34,13 +34,20 @@ contract DailyCheckInBadge is ERC1155, Ownable, ReentrancyGuard {
     // Mapping: wallet => badge ID => has badge
     mapping(address => mapping(uint256 => bool)) public hasBadge;
 
+    // Fee for daily check-in (in wei)
+    uint256 public checkInFee;
+
     // Events
-    event CheckIn(address indexed user, uint256 streak, uint256 timestamp);
+    event CheckIn(address indexed user, uint256 streak, uint256 timestamp, uint256 fee);
     event BadgeMinted(address indexed user, uint256 badgeId, uint256 day);
+    event FeeUpdated(uint256 oldFee, uint256 newFee);
+    event FeeWithdrawn(address indexed owner, uint256 amount);
 
     constructor() ERC1155("") Ownable(msg.sender) {
         // Base URI for metadata (can be updated later)
         _setURI("https://tech-mini-kappa.vercel.app/api/badge-metadata/");
+        // Set initial fee (0.01 ETH = 10000000000000000 wei)
+        checkInFee = 10000000000000000;
     }
 
     /**
@@ -79,10 +86,14 @@ contract DailyCheckInBadge is ERC1155, Ownable, ReentrancyGuard {
      * @dev Main check-in function - enforces one check-in per day per wallet
      * Mints badges at milestones (Day 1, 3, 7, 14)
      * Uses timestamp-based daily restriction
+     * Requires fee payment
      */
-    function checkIn() external nonReentrant {
+    function checkIn() external payable nonReentrant {
         address user = msg.sender;
         uint256 today = getTodayTimestamp();
+
+        // Require fee payment
+        require(msg.value >= checkInFee, "DailyCheckIn: Insufficient fee");
 
         // Enforce one check-in per day
         require(
@@ -116,7 +127,7 @@ contract DailyCheckInBadge is ERC1155, Ownable, ReentrancyGuard {
         // Mint badges at milestones
         _mintBadgesForMilestone(user, newStreak);
 
-        emit CheckIn(user, newStreak, block.timestamp);
+        emit CheckIn(user, newStreak, block.timestamp, msg.value);
     }
 
     /**
@@ -174,6 +185,45 @@ contract DailyCheckInBadge is ERC1155, Ownable, ReentrancyGuard {
      */
     function setURI(string memory newURI) external onlyOwner {
         _setURI(newURI);
+    }
+
+    /**
+     * @dev Set check-in fee (owner only)
+     * @param newFee New fee amount in wei
+     */
+    function setCheckInFee(uint256 newFee) external onlyOwner {
+        uint256 oldFee = checkInFee;
+        checkInFee = newFee;
+        emit FeeUpdated(oldFee, newFee);
+    }
+
+    /**
+     * @dev Get current check-in fee
+     * @return fee amount in wei
+     */
+    function getCheckInFee() external view returns (uint256) {
+        return checkInFee;
+    }
+
+    /**
+     * @dev Withdraw collected fees (owner only)
+     */
+    function withdrawFees() external onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "DailyCheckIn: No fees to withdraw");
+        
+        (bool success, ) = payable(owner()).call{value: balance}("");
+        require(success, "DailyCheckIn: Withdrawal failed");
+        
+        emit FeeWithdrawn(owner(), balance);
+    }
+
+    /**
+     * @dev Get contract balance (collected fees)
+     * @return balance in wei
+     */
+    function getContractBalance() external view returns (uint256) {
+        return address(this).balance;
     }
 
     /**
