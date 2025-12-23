@@ -65,24 +65,40 @@ export default function Home() {
   // Update local state from contract
   useEffect(() => {
     if (address) {
+      // Always update canCheckIn, even if false
       if (canCheckInToday !== undefined && typeof canCheckInToday === 'boolean') {
         setCanCheckIn(canCheckInToday);
       }
+      
+      // Always update streak, even if 0
       if (contractStreak !== undefined && contractStreak !== null) {
         const newStreak = Number(contractStreak);
         setPreviousStreak(streak);
         setStreak(newStreak);
+      } else {
+        // If no streak data yet, set to 0
+        setStreak(0);
       }
+      
+      // Update last check-in date
       if (lastCheckInTimestamp !== undefined && lastCheckInTimestamp !== null && Number(lastCheckInTimestamp) > 0) {
         const timestamp = Number(lastCheckInTimestamp) * 1000; // Convert to milliseconds
         setLastCheckIn(new Date(timestamp));
+      } else {
+        setLastCheckIn(null);
       }
+    } else {
+      // Reset when no address
+      setStreak(0);
+      setLastCheckIn(null);
+      setCanCheckIn(false);
     }
-    // Update fee
+    
+    // Update fee (always, not dependent on address)
     if (fee !== undefined && fee !== null) {
       setCheckInFee(BigInt(fee.toString()));
     }
-  }, [address, canCheckInToday, contractStreak, lastCheckInTimestamp, fee]);
+  }, [address, canCheckInToday, contractStreak, lastCheckInTimestamp, fee, streak]);
 
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({

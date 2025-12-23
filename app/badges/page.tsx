@@ -70,11 +70,17 @@ export default function BadgesPage() {
   });
 
   useEffect(() => {
-    if (address && contractStreak !== undefined) {
-      const streakCount = Number(contractStreak);
-      setStreak(streakCount);
+    if (address) {
+      // Always update streak, even if it's 0 or undefined
+      if (contractStreak !== undefined && contractStreak !== null) {
+        const streakCount = Number(contractStreak);
+        setStreak(streakCount);
+      } else {
+        setStreak(0);
+      }
 
       // Update badge unlock status based on contract balances
+      // This should run even if badge data is still loading
       setBadges(BADGES.map((badge, index) => {
         let hasBadge = false;
         const checkBadge = (value: unknown): boolean => {
@@ -96,6 +102,10 @@ export default function BadgesPage() {
           unlocked: hasBadge,
         };
       }));
+    } else {
+      // Reset when no address
+      setStreak(0);
+      setBadges(BADGES.map(badge => ({ ...badge, unlocked: false })));
     }
   }, [address, contractStreak, badge1, badge3, badge7, badge14]);
 
