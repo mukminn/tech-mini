@@ -114,17 +114,21 @@ export default function Home() {
   // Save activity and refresh data after successful transaction
   useEffect(() => {
     if (isSuccess && address && hash) {
-      // Wait a bit for contract state to update
-      setTimeout(async () => {
-        // Get updated streak from contract
-        const updatedStreak = contractStreak ? Number(contractStreak) + 1 : streak + 1;
+      // Wait for contract state to update (blockchain confirmation)
+      const saveActivity = async () => {
+        // Wait longer for contract state to be confirmed
+        await new Promise(resolve => setTimeout(resolve, 5000));
         
-        // Save check-in activity to localStorage
+        // Try to read updated streak from contract
+        // For now, use estimated streak (will be updated by contract read)
+        const estimatedStreak = streak + 1;
+        
+        // Save check-in activity to localStorage immediately
         const activityItem = {
           id: `checkin-${Date.now()}-${hash}`,
           date: new Date().toISOString(),
           type: "checkin" as const,
-          message: `Checked in! Day ${updatedStreak} streak`,
+          message: `Checked in! Day ${estimatedStreak} streak`,
         };
 
         const existingActivities = localStorage.getItem(`activities_${address}`);
@@ -133,7 +137,7 @@ export default function Home() {
 
         // Check if badge was earned (milestone days: 1, 3, 7, 14)
         const badgeMilestones = [1, 3, 7, 14];
-        if (badgeMilestones.includes(updatedStreak)) {
+        if (badgeMilestones.includes(estimatedStreak)) {
           const badgeNames: Record<number, string> = {
             1: "First Check-in",
             3: "3 Day Starter",
@@ -142,22 +146,27 @@ export default function Home() {
           };
           
           const badgeActivity = {
-            id: `badge-${Date.now()}-${updatedStreak}`,
+            id: `badge-${Date.now()}-${estimatedStreak}`,
             date: new Date().toISOString(),
             type: "badge" as const,
-            message: `🏆 Earned badge: ${badgeNames[updatedStreak]}!`,
-            badgeName: badgeNames[updatedStreak],
+            message: `🏆 Earned badge: ${badgeNames[estimatedStreak]}!`,
+            badgeName: badgeNames[estimatedStreak],
           };
           activities.push(badgeActivity);
         }
 
         localStorage.setItem(`activities_${address}`, JSON.stringify(activities));
 
-        // Reload to show updated data
-        window.location.reload();
-      }, 3000);
+        // Trigger page refresh to show updated data
+        // Use a shorter delay to ensure localStorage is saved
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      };
+
+      saveActivity();
     }
-  }, [isSuccess, address, hash, streak, contractStreak]);
+  }, [isSuccess, address, hash, streak]);
 
   const getNextBadge = () => {
     if (streak >= 14) return null;

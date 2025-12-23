@@ -78,7 +78,13 @@ export default function BadgesPage() {
       setBadges(BADGES.map((badge, index) => {
         let hasBadge = false;
         const checkBadge = (value: unknown): boolean => {
-          return value !== undefined && value !== null && (typeof value === 'bigint' || typeof value === 'string' || typeof value === 'number') && BigInt(value) > BigInt(0);
+          if (value === undefined || value === null) return false;
+          try {
+            const bigIntValue = typeof value === 'bigint' ? value : BigInt(String(value));
+            return bigIntValue > BigInt(0);
+          } catch {
+            return false;
+          }
         };
         if (index === 0) hasBadge = checkBadge(badge1);
         if (index === 1) hasBadge = checkBadge(badge3);
@@ -92,6 +98,19 @@ export default function BadgesPage() {
       }));
     }
   }, [address, contractStreak, badge1, badge3, badge7, badge14]);
+
+  // Refresh badge data periodically to catch updates
+  useEffect(() => {
+    if (address) {
+      const interval = setInterval(() => {
+        // Force re-render by updating a dummy state
+        // The useReadContract hooks will automatically refetch
+        window.dispatchEvent(new Event('focus'));
+      }, 5000); // Check every 5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [address]);
 
   return (
     <div className={styles.container}>
