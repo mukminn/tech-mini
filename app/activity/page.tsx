@@ -68,6 +68,14 @@ export default function ActivityPage() {
   if (activities.length === 0) {
     return (
       <div className={styles.container}>
+        <img src="/sphere.png" alt="" className={styles.decorativeSphere} aria-hidden="true" />
+        <img src="/sphere.png" alt="" className={styles.decorativeSphere2} aria-hidden="true" />
+        <img src="/sphere.png" alt="" className={styles.decorativeSphere3} aria-hidden="true" />
+        <img src="/sphere.png" alt="" className={styles.decorativeSphere4} aria-hidden="true" />
+        <img src="/sphere.png" alt="" className={styles.decorativeSphere5} aria-hidden="true" />
+        <img src="/sphere.png" alt="" className={styles.decorativeSphere6} aria-hidden="true" />
+        <img src="/sphere.png" alt="" className={styles.decorativeSphere7} aria-hidden="true" />
+        <img src="/sphere.png" alt="" className={styles.decorativeSphere8} aria-hidden="true" />
         <div className={styles.header}>
           <h1 className={styles.title}>Activity</h1>
           <p className={styles.subtitle}>Your check-in history</p>
@@ -82,6 +90,14 @@ export default function ActivityPage() {
 
   return (
     <div className={styles.container}>
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere2} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere3} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere4} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere5} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere6} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere7} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere8} aria-hidden="true" />
       <div className={styles.header}>
         <h1 className={styles.title}>Activity</h1>
         <p className={styles.subtitle}>Your check-in history</p>

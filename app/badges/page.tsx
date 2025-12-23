@@ -95,6 +95,14 @@ export default function BadgesPage() {
 
   return (
     <div className={styles.container}>
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere2} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere3} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere4} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere5} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere6} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere7} aria-hidden="true" />
+      <img src="/sphere.png" alt="" className={styles.decorativeSphere8} aria-hidden="true" />
       <div className={styles.header}>
         <h1 className={styles.title}>Badges</h1>
         <p className={styles.subtitle}>Earn badges by maintaining your streak</p>
