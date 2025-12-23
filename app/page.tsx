@@ -12,7 +12,7 @@ export default function Home() {
   const [lastCheckIn, setLastCheckIn] = useState<Date | null>(null);
   const [canCheckIn, setCanCheckIn] = useState(false);
   const [previousStreak, setPreviousStreak] = useState(0);
-  const [checkInFee, setCheckInFee] = useState<bigint>(0n);
+  const [checkInFee, setCheckInFee] = useState<bigint>(BigInt(0));
 
   // Initialize the miniapp
   useEffect(() => {
@@ -213,7 +213,7 @@ export default function Home() {
           </div>
         )}
 
-        {checkInFee > 0n && (
+        {checkInFee > BigInt(0) && (
           <div className={styles.feeInfo}>
             <p className={styles.feeLabel}>Check-in Fee:</p>
             <p className={styles.feeAmount}>
