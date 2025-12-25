@@ -8,6 +8,7 @@ import styles from "./page.module.css";
 export default function Home() {
   const { isFrameReady, setFrameReady, context } = useMiniKit();
   const [debug, setDebug] = useState(false);
+  const [clientInfo, setClientInfo] = useState<{ href: string; userAgent: string } | null>(null);
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const expectedChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 8453;
@@ -29,8 +30,10 @@ export default function Home() {
   useEffect(() => {
     try {
       setDebug(new URLSearchParams(window.location.search).get("debug") === "1");
+      setClientInfo({ href: window.location.href, userAgent: navigator.userAgent });
     } catch {
       setDebug(false);
+      setClientInfo(null);
     }
   }, []);
 
@@ -278,6 +281,7 @@ export default function Home() {
           <div style={{ width: "100%", fontSize: 12, opacity: 0.85 }}>
             <div>debug=1</div>
             <div>isFrameReady: {String(isFrameReady)}</div>
+            <div>hasApiKey: {String(Boolean(process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY))}</div>
             <div>address: {address ? address : "(none)"}</div>
             <div>isConnected: {String(isConnected)}</div>
             <div>chainId: {String(chainId)}</div>
@@ -285,6 +289,8 @@ export default function Home() {
             <div>isCorrectChain: {String(isCorrectChain)}</div>
             <div>context.user.displayName: {context?.user?.displayName ?? "(none)"}</div>
             <div>context.user.fid: {context?.user?.fid ?? "(none)"}</div>
+            <div>href: {clientInfo?.href ?? "(none)"}</div>
+            <div>userAgent: {clientInfo?.userAgent ?? "(none)"}</div>
           </div>
         )}
 
