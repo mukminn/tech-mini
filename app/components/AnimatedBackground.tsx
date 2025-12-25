@@ -64,15 +64,34 @@ export function AnimatedBackground() {
       return true;
     };
 
+    const COLLISION_BOUNCE = 0.35;
+    const COLLISION_DAMPING = 0.92;
+    const COLLISION_TANGENTIAL_KICK = 14;
+    const COLLISION_SPHERE_RADIUS_SCALE = 0.5;
+    const COLLISION_INSET_PX = 1.2;
+
     const spinSphere = (el: Element, ms: number, intensity: number) => {
       if (!canSpin(el, ms)) return;
       try {
         (el as HTMLElement).animate(
           [
-            { transform: "rotate(0deg)" },
-            { transform: `rotate(${Math.max(180, Math.min(420, 220 + intensity * 200))}deg)` },
+            {
+              transform: "rotate(0deg)",
+              filter:
+                "saturate(1) brightness(1) drop-shadow(0 0 0 rgba(0, 82, 255, 0))",
+            },
+            {
+              transform: `rotate(${Math.max(180, Math.min(420, 220 + intensity * 200))}deg)`,
+              filter:
+                "saturate(3.2) contrast(1.25) brightness(1.22) drop-shadow(0 0 6px rgba(0, 82, 255, 0.95)) drop-shadow(0 0 18px rgba(0, 140, 255, 0.75)) drop-shadow(0 0 36px rgba(170, 220, 255, 0.45))",
+            },
+            {
+              transform: `rotate(${Math.max(180, Math.min(420, 220 + intensity * 200))}deg)`,
+              filter:
+                "saturate(1) brightness(1) drop-shadow(0 0 0 rgba(0, 82, 255, 0))",
+            },
           ],
-          { duration: 420, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+          { duration: 520, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
         );
       } catch {
         // ignore
@@ -285,24 +304,24 @@ export function AnimatedBackground() {
             const dx = p.x - s.cx;
             const dy = p.y - s.cy;
             const d2 = dx * dx + dy * dy;
-            const hitR = s.r * 0.58 + p.radius;
+            const hitR = Math.max(1, s.r * COLLISION_SPHERE_RADIUS_SCALE + p.radius - COLLISION_INSET_PX);
             if (d2 > 0.001 && d2 < hitR * hitR) {
               const d = Math.sqrt(d2);
               const nx = dx / d;
               const ny = dy / d;
 
-              p.x = s.cx + nx * (hitR + 1);
-              p.y = s.cy + ny * (hitR + 1);
+              p.x = s.cx + nx * hitR;
+              p.y = s.cy + ny * hitR;
 
               const vn = p.vx * nx + p.vy * ny;
               if (vn < 0) {
-                const bounce = 0.35;
-                p.vx = p.vx - (1 + bounce) * vn * nx;
-                p.vy = p.vy - (1 + bounce) * vn * ny;
+                p.vx = p.vx - (1 + COLLISION_BOUNCE) * vn * nx;
+                p.vy = p.vy - (1 + COLLISION_BOUNCE) * vn * ny;
+                p.vx *= COLLISION_DAMPING;
+                p.vy *= COLLISION_DAMPING;
               }
-              const tangentialKick = 18;
-              p.vx += -ny * tangentialKick * dt;
-              p.vy += nx * tangentialKick * dt;
+              p.vx += -ny * COLLISION_TANGENTIAL_KICK * dt;
+              p.vy += nx * COLLISION_TANGENTIAL_KICK * dt;
 
               spinSphere(s.el, ms, Math.min(1, Math.max(0.25, p.radius / 16)));
             }
