@@ -1,15 +1,13 @@
 ﻿"use client";
 import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { useSearchParams } from "next/navigation";
 import { useAccount, useChainId, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "../lib/contract";
 import styles from "./page.module.css";
 
 export default function Home() {
   const { isFrameReady, setFrameReady, context } = useMiniKit();
-  const searchParams = useSearchParams();
-  const debug = searchParams.get("debug") === "1";
+  const [debug, setDebug] = useState(false);
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const expectedChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 8453;
@@ -27,6 +25,14 @@ export default function Home() {
       setFrameReady();
     }
   }, [setFrameReady, isFrameReady]);
+
+  useEffect(() => {
+    try {
+      setDebug(new URLSearchParams(window.location.search).get("debug") === "1");
+    } catch {
+      setDebug(false);
+    }
+  }, []);
 
   // Read contract state with refetch interval
   const { data: canCheckInToday, refetch: refetchCanCheckIn } = useReadContract({
