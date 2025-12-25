@@ -1,12 +1,15 @@
 ﻿"use client";
 import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { useSearchParams } from "next/navigation";
 import { useAccount, useChainId, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "../lib/contract";
 import styles from "./page.module.css";
 
 export default function Home() {
   const { isFrameReady, setFrameReady, context } = useMiniKit();
+  const searchParams = useSearchParams();
+  const debug = searchParams.get("debug") === "1";
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const expectedChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 8453;
@@ -265,6 +268,20 @@ export default function Home() {
       <img src="/sphere.png" alt="" className={styles.decorativeSphere7} aria-hidden="true" />
       <img src="/sphere.png" alt="" className={styles.decorativeSphere8} aria-hidden="true" />
       <div className={styles.content}>
+        {debug && (
+          <div style={{ width: "100%", fontSize: 12, opacity: 0.85 }}>
+            <div>debug=1</div>
+            <div>isFrameReady: {String(isFrameReady)}</div>
+            <div>address: {address ? address : "(none)"}</div>
+            <div>isConnected: {String(isConnected)}</div>
+            <div>chainId: {String(chainId)}</div>
+            <div>expectedChainId: {String(expectedChainId)}</div>
+            <div>isCorrectChain: {String(isCorrectChain)}</div>
+            <div>context.user.displayName: {context?.user?.displayName ?? "(none)"}</div>
+            <div>context.user.fid: {context?.user?.fid ?? "(none)"}</div>
+          </div>
+        )}
+
         {!address && (
           <div style={{ width: "100%", textAlign: "center", opacity: 0.75 }}>
             Waiting for wallet auto-connect…
