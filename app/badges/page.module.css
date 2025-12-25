@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 80px);
-  background: var(--background) !important;
+  background: transparent !important;
   color: var(--foreground);
   padding: 1.5rem;
   padding-bottom: calc(1.5rem + 80px);
@@ -189,8 +189,8 @@
 }
 
 .badgeCard {
-  background: var(--surface);
-  border: 2px solid var(--border);
+  background: linear-gradient(180deg, var(--ice-bg), rgba(255, 255, 255, 0.25));
+  border: 2px solid var(--ice-border);
   border-radius: 16px;
   padding: 1.5rem 1rem;
   text-align: center;
@@ -203,6 +203,9 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--ice-inset), var(--ice-shadow), 0 0 0 2px var(--ice-border-2);
 }
 
 .badgeCard::before {
@@ -226,17 +229,18 @@
 }
 
 .badgeCard.unlocked {
-  border-color: var(--base-blue);
-  background: var(--base-blue-light);
+  border-color: rgba(0, 82, 255, 0.35);
+  background: linear-gradient(180deg, rgba(0, 82, 255, 0.12), rgba(255, 255, 255, 0.25));
   animation: pulseGlow 2s ease-in-out infinite;
+  box-shadow: var(--ice-inset), var(--ice-shadow), 0 0 0 2px rgba(0, 82, 255, 0.18);
 }
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 10px rgba(0, 82, 255, 0.3);
+    box-shadow: var(--ice-inset), 0 12px 30px rgba(0, 0, 0, 0.10), 0 0 0 2px rgba(0, 82, 255, 0.18), 0 0 12px rgba(0, 82, 255, 0.24);
   }
   50% {
-    box-shadow: 0 0 20px rgba(0, 82, 255, 0.6);
+    box-shadow: var(--ice-inset), 0 14px 34px rgba(0, 0, 0, 0.12), 0 0 0 2px rgba(0, 82, 255, 0.18), 0 0 22px rgba(0, 82, 255, 0.55);
   }
 }
 

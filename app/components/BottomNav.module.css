@@ -6,13 +6,13 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), var(--ice-bg));
+  border-top: 2px solid var(--ice-border);
   padding: 0.75rem 0;
   z-index: 1000;
-  backdrop-filter: blur(10px);
-  background: var(--surface);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--ice-inset), 0 -10px 24px rgba(0, 0, 0, 0.08), 0 0 0 2px var(--ice-border-2);
 }
 
 .navItem {
@@ -53,8 +53,8 @@
 
 @media (prefers-color-scheme: dark) {
   .bottomNav {
-    background: var(--surface);
-    border-top-color: var(--border);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(180deg, rgba(10, 10, 10, 0.25), var(--ice-bg));
+    border-top-color: var(--ice-border);
+    box-shadow: var(--ice-inset), 0 -12px 28px rgba(0, 0, 0, 0.45), 0 0 0 2px var(--ice-border-2);
   }
 }

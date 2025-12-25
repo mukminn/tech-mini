@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 80px); /* Account for bottom nav */
-  background: var(--background) !important;
+  background: transparent !important;
   color: var(--foreground);
   padding: 1.5rem;
   padding-bottom: calc(1.5rem + 80px); /* Space for bottom nav */
@@ -190,13 +190,16 @@
 }
 
 .streakCard {
-  background: var(--surface);
-  border: 2px solid var(--border);
+  background: linear-gradient(180deg, var(--ice-bg), rgba(255, 255, 255, 0.25));
+  border: 2px solid var(--ice-border);
   border-radius: 16px;
   padding: 2rem;
   text-align: center;
   width: 100%;
   min-height: 44px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--ice-inset), var(--ice-shadow), 0 0 0 2px var(--ice-border-2);
 }
 
 .streakNumber {
@@ -223,12 +226,15 @@
 }
 
 .nextBadgeCard {
-  background: var(--base-blue-light);
-  border: 2px solid var(--base-blue);
+  background: linear-gradient(180deg, rgba(0, 82, 255, 0.12), rgba(255, 255, 255, 0.25));
+  border: 2px solid rgba(0, 82, 255, 0.35);
   border-radius: 16px;
   padding: 1.5rem;
   width: 100%;
   text-align: center;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--ice-inset), var(--ice-shadow), 0 0 0 2px rgba(0, 82, 255, 0.18);
 }
 
 .nextBadgeLabel {
@@ -270,13 +276,16 @@
 }
 
 .feeInfo {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--ice-bg), rgba(255, 255, 255, 0.25));
+  border: 2px solid var(--ice-border);
   border-radius: 12px;
   padding: 1rem;
   text-align: center;
   width: 100%;
   margin-top: 1rem;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--ice-inset), var(--ice-shadow), 0 0 0 2px var(--ice-border-2);
 }
 
 .feeLabel {
@@ -328,7 +337,7 @@
 
 .successMessage {
   background: rgba(0, 82, 255, 0.1);
-  border: 1px solid var(--base-blue);
+  border: 2px solid rgba(0, 82, 255, 0.35);
   border-radius: 8px;
   padding: 1rem;
   color: var(--base-blue);
@@ -336,6 +345,9 @@
   text-align: center;
   width: 100%;
   animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--ice-inset), 0 10px 24px rgba(0, 82, 255, 0.12), 0 0 0 2px rgba(0, 82, 255, 0.18);
 }
 
 @keyframes fadeIn {
@@ -351,7 +363,7 @@
 
 @media (prefers-color-scheme: dark) {
   .streakCard {
-    background: var(--surface);
-    border-color: var(--border);
+    background: linear-gradient(180deg, var(--ice-bg), rgba(0, 0, 0, 0.15));
+    border-color: var(--ice-border);
   }
 }

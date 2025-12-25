@@ -11,6 +11,8 @@ interface Particle {
   radius: number;
   opacity: number;
   glowIntensity: number;
+  drift: number;
+  phase: number;
 }
 
 export function AnimatedBackground() {
@@ -26,111 +28,117 @@ export function AnimatedBackground() {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // Set canvas size
+    let cssWidth = 0;
+    let cssHeight = 0;
+    let dpr = 1;
+
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      cssWidth = window.innerWidth;
+      cssHeight = window.innerHeight;
+      canvas.width = Math.floor(cssWidth * dpr);
+      canvas.height = Math.floor(cssHeight * dpr);
+      canvas.style.width = `${cssWidth}px`;
+      canvas.style.height = `${cssHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Physics constants
-    const BOUNCE_DAMPING = 0.95;
-    const BASE_RADIUS = 15;
-    const PARTICLE_COUNT = 50; // 50 bola
+    const PARTICLE_COUNT = 55;
 
-    // Initialize particles
+    const isDark = () => window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    const rand = (min: number, max: number) => min + Math.random() * (max - min);
+
+    const spawnParticle = (y?: number): Particle => {
+      const radius = rand(8, 20);
+      const baseOpacity = rand(0.22, 0.55);
+      return {
+        x: rand(0, cssWidth),
+        y: y ?? rand(-cssHeight, cssHeight),
+        vx: rand(-18, 18),
+        vy: rand(28, 90) + radius * 4,
+        radius,
+        opacity: baseOpacity,
+        glowIntensity: rand(0.35, 0.9),
+        drift: rand(12, 40),
+        phase: rand(0, Math.PI * 2),
+      };
+    };
+
     const initParticles = () => {
       particlesRef.current = [];
       for (let i = 0; i < PARTICLE_COUNT; i++) {
-        particlesRef.current.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 3,
-          vy: (Math.random() - 0.5) * 3,
-          radius: BASE_RADIUS + Math.random() * 10,
-          opacity: 0.4 + Math.random() * 0.4,
-          glowIntensity: 0.6 + Math.random() * 0.4,
-        });
+        particlesRef.current.push(spawnParticle());
       }
     };
     initParticles();
 
-    // Animation loop
     const animate = (currentTime: number) => {
-      const deltaTime = currentTime - lastTimeRef.current;
+      const deltaMs = currentTime - lastTimeRef.current;
       lastTimeRef.current = currentTime;
+      const dt = Math.min(0.033, Math.max(0.001, deltaMs / 1000));
 
-      // Clear canvas with fade
-      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      ctx.fillStyle = isDark ? "rgba(10, 10, 10, 0.1)" : "rgba(255, 255, 255, 0.08)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, cssWidth, cssHeight);
 
-      // Update and draw particles
-      particlesRef.current.forEach((particle) => {
-        // Update position
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+      const dark = isDark();
+      const tint = dark ? { r: 120, g: 175, b: 255 } : { r: 0, g: 130, b: 255 };
 
-        // Bounce off edges
-        if (particle.y - particle.radius <= 0) {
-          particle.y = particle.radius;
-          particle.vy *= -BOUNCE_DAMPING;
-        }
-        if (particle.y + particle.radius >= canvas.height) {
-          particle.y = canvas.height - particle.radius;
-          particle.vy *= -BOUNCE_DAMPING;
-        }
-        if (particle.x - particle.radius <= 0) {
-          particle.x = particle.radius;
-          particle.vx *= -BOUNCE_DAMPING;
-        }
-        if (particle.x + particle.radius >= canvas.width) {
-          particle.x = canvas.width - particle.radius;
-          particle.vx *= -BOUNCE_DAMPING;
+      for (let i = 0; i < particlesRef.current.length; i++) {
+        const p = particlesRef.current[i];
+
+        p.phase += dt * rand(0.8, 1.4);
+        p.x += (p.vx + Math.sin(p.phase) * p.drift) * dt;
+        p.y += p.vy * dt;
+
+        if (p.x < -120) p.x = cssWidth + 120;
+        if (p.x > cssWidth + 120) p.x = -120;
+
+        if (p.y - p.radius > cssHeight + 160) {
+          particlesRef.current[i] = spawnParticle(rand(-260, -40));
+          continue;
         }
 
-        // Draw particle with blue neon glow
-        const gradient = ctx.createRadialGradient(
-          particle.x,
-          particle.y,
-          0,
-          particle.x,
-          particle.y,
-          particle.radius * 2.5
-        );
+        const glow = p.opacity * p.glowIntensity;
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 2.2);
+        grad.addColorStop(0, `rgba(${tint.r}, ${tint.g}, ${tint.b}, ${Math.min(0.75, glow)})`);
+        grad.addColorStop(0.35, `rgba(${tint.r}, ${tint.g}, ${tint.b}, ${Math.min(0.35, glow * 0.5)})`);
+        grad.addColorStop(1, `rgba(${tint.r}, ${tint.g}, ${tint.b}, 0)`);
 
-        const baseColor = `rgba(0, 150, 255, ${particle.opacity})`;
-        const glowColor = `rgba(0, 100, 255, ${particle.opacity * particle.glowIntensity * 0.4})`;
-        const outerGlow = `rgba(0, 150, 255, ${particle.opacity * 0.1})`;
-
-        gradient.addColorStop(0, baseColor);
-        gradient.addColorStop(0.4, glowColor);
-        gradient.addColorStop(0.8, outerGlow);
-        gradient.addColorStop(1, "rgba(0, 150, 255, 0)");
-
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.radius * 2.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius * 2.2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Inner bright core
-        ctx.fillStyle = `rgba(0, 200, 255, ${particle.opacity * 0.9})`;
+        ctx.fillStyle = dark
+          ? `rgba(255, 255, 255, ${Math.min(0.85, p.opacity + 0.22)})`
+          : `rgba(255, 255, 255, ${Math.min(0.78, p.opacity + 0.18)})`;
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.radius * 0.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
-      });
+      }
 
       animationFrameRef.current = requestAnimationFrame(animate);
     };
 
-    // Start animation
     lastTimeRef.current = performance.now();
     animationFrameRef.current = requestAnimationFrame(animate);
 
-    // Cleanup
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = undefined;
+      } else {
+        lastTimeRef.current = performance.now();
+        animationFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
       window.removeEventListener("resize", resizeCanvas);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }

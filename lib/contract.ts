@@ -28,17 +28,6 @@ export const CONTRACT_ABI: Abi = [
     "inputs": [
       { "internalType": "address", "name": "user", "type": "address" }
     ],
-    "name": "lastCheckIn",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
     "name": "canCheckInToday",
     "outputs": [
       { "internalType": "bool", "name": "", "type": "bool" }

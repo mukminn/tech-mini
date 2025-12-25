@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 80px);
-  background: var(--background) !important;
+  background: transparent !important;
   color: var(--foreground);
   padding: 1.5rem;
   padding-bottom: calc(1.5rem + 80px);
@@ -215,32 +215,40 @@
   height: 44px;
   min-height: 44px;
   min-width: 44px;
-  background: var(--surface);
-  border: 2px solid var(--base-blue);
+  background: linear-gradient(180deg, var(--ice-bg), rgba(255, 255, 255, 0.25));
+  border: 2px solid var(--ice-border);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
   z-index: 1;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--ice-inset), 0 10px 24px rgba(0, 82, 255, 0.10), 0 0 0 2px var(--ice-border-2);
 }
 
 .timelineLine {
   position: absolute;
   left: 21px;
   top: 44px;
-  width: 2px;
+  width: 4px;
   height: calc(100% - 44px);
-  background: var(--border);
+  background: linear-gradient(180deg, var(--separator), rgba(0, 82, 255, 0.12));
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--ice-border);
   z-index: 0;
 }
 
 .timelineContent {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--ice-bg), rgba(255, 255, 255, 0.25));
+  border: 2px solid var(--ice-border);
   border-radius: 12px;
   padding: 1rem;
   min-height: 44px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--ice-inset), var(--ice-shadow), 0 0 0 2px var(--ice-border-2);
 }
 
 .activityMessage {

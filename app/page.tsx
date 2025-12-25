@@ -83,10 +83,12 @@ export default function Home() {
       if (contractStreak !== undefined && contractStreak !== null) {
         const newStreak = Number(contractStreak);
         // Only update previousStreak if streak actually changed
-        if (newStreak !== streak) {
-          setPreviousStreak(streak);
-        }
-        setStreak(newStreak);
+        setStreak((prevStreak) => {
+          if (newStreak !== prevStreak) {
+            setPreviousStreak(prevStreak);
+          }
+          return newStreak;
+        });
       } else {
         // For new users, set to 0 explicitly
         setStreak(0);

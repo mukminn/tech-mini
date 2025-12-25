@@ -1,5 +1,4 @@
-@layer base {
-  :root {
+ :root {
     /* Base Blue Theme */
     --base-blue: #0052FF;
     --base-blue-hover: #0040CC;
@@ -8,6 +7,13 @@
     --foreground: #171717;
     --surface: #f8f9fa;
     --border: #e5e7eb;
+    --ice-tint: rgba(0, 82, 255, 0.10);
+    --ice-bg: rgba(255, 255, 255, 0.55);
+    --ice-border: rgba(255, 255, 255, 0.55);
+    --ice-border-2: rgba(0, 82, 255, 0.18);
+    --ice-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
+    --ice-inset: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    --separator: rgba(0, 0, 0, 0.08);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -17,6 +23,13 @@
       --surface: #1a1a1a;
       --border: #333333;
       --base-blue-light: rgba(0, 82, 255, 0.1);
+      --ice-tint: rgba(0, 82, 255, 0.16);
+      --ice-bg: rgba(20, 20, 20, 0.55);
+      --ice-border: rgba(255, 255, 255, 0.14);
+      --ice-border-2: rgba(0, 82, 255, 0.22);
+      --ice-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+      --ice-inset: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      --separator: rgba(255, 255, 255, 0.10);
     }
   }
 
@@ -84,4 +97,4 @@
   * {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
-}
+

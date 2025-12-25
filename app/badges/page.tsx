@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI, BADGE_IDS } from "../../lib/contract";
@@ -169,7 +169,7 @@ export default function BadgesPage() {
                 badge.image ? (
                   <img src={badge.image} alt={badge.name} className={styles.badgeImage} />
                 ) : (
-                  <div className={styles.badgeIconUnlocked}>ðŸ†</div>
+                  <div className={styles.badgeIconUnlocked}>🏆</div>
                 )
               ) : (
                 <div className={styles.badgeIconLocked}>🔒</div>
