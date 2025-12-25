@@ -6,7 +6,7 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI } from "../lib/contract";
 import styles from "./page.module.css";
 
 export default function Home() {
-  const { isFrameReady, setFrameReady, context } = useMiniKit();
+  const { setFrameReady, context } = useMiniKit();
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const expectedChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 8453;
@@ -18,9 +18,7 @@ export default function Home() {
   const [previousStreak, setPreviousStreak] = useState(0);
   const [checkInFee, setCheckInFee] = useState<bigint>(BigInt(0));
 
-  // Initialize the miniapp
   useEffect(() => {
-    // Delay init slightly so Warpcast/Farcaster has time to finish setting up.
     const t = setTimeout(() => {
       try {
         setFrameReady();
@@ -28,20 +26,46 @@ export default function Home() {
         // ignore
       }
     }, 700);
-
     return () => {
       clearTimeout(t);
     };
   }, [setFrameReady]);
 
-  // Retry frame-ready briefly if wallet address hasn't been injected yet.
+  useEffect(() => {
+    let last = 0;
+    const minIntervalMs = 1200;
+
+    const trigger = () => {
+      const now = Date.now();
+      if (now - last < minIntervalMs) return;
+      last = now;
+      try {
+        setFrameReady();
+      } catch {
+        // ignore
+      }
+    };
+
+    const onFocus = () => trigger();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") trigger();
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [setFrameReady]);
+
   useEffect(() => {
     if (address || isConnected) return;
 
     let attempts = 0;
     const maxAttempts = 5;
     const intervalMs = 1500;
-
     let interval: ReturnType<typeof setInterval> | null = null;
 
     const startDelay = setTimeout(() => {
