@@ -20,7 +20,7 @@ export const minikitConfig = {
     description: "Daily onchain actions with badges",
     screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`, `${ROOT_URL}/screenshot.png`],
     iconUrl: `${ROOT_URL}/icon.png`,
-    splashImageUrl: `${ROOT_URL}/splash.png`,
+    splashImageUrl: `${ROOT_URL}/splash.jpg`,
     splashBackgroundColor: "#000000",
     homeUrl: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
