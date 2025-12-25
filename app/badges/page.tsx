@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useChainId, useReadContract } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI, BADGE_IDS } from "../../lib/contract";
 import styles from "./page.module.css";
 
@@ -22,6 +22,9 @@ const BADGES: Badge[] = [
 
 export default function BadgesPage() {
   const { address } = useAccount();
+  const chainId = useChainId();
+  const expectedChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 8453;
+  const isCorrectChain = chainId === expectedChainId;
   const [badges, setBadges] = useState<Badge[]>(BADGES);
   const [streak, setStreak] = useState(0);
 
@@ -32,7 +35,7 @@ export default function BadgesPage() {
     functionName: "getStreak",
     args: address ? [address] : undefined,
     query: {
-      enabled: !!address,
+      enabled: !!address && isCorrectChain,
       refetchInterval: 10000, // Refetch every 10 seconds
       refetchOnWindowFocus: true,
     },
@@ -45,7 +48,7 @@ export default function BadgesPage() {
     functionName: "balanceOf",
     args: address ? [address, BADGE_IDS.DAY_1] : undefined,
     query: { 
-      enabled: !!address,
+      enabled: !!address && isCorrectChain,
       refetchInterval: 10000,
       refetchOnWindowFocus: true,
     },
@@ -57,7 +60,7 @@ export default function BadgesPage() {
     functionName: "balanceOf",
     args: address ? [address, BADGE_IDS.DAY_3] : undefined,
     query: { 
-      enabled: !!address,
+      enabled: !!address && isCorrectChain,
       refetchInterval: 10000,
       refetchOnWindowFocus: true,
     },
@@ -69,7 +72,7 @@ export default function BadgesPage() {
     functionName: "balanceOf",
     args: address ? [address, BADGE_IDS.DAY_7] : undefined,
     query: { 
-      enabled: !!address,
+      enabled: !!address && isCorrectChain,
       refetchInterval: 10000,
       refetchOnWindowFocus: true,
     },
@@ -81,7 +84,7 @@ export default function BadgesPage() {
     functionName: "balanceOf",
     args: address ? [address, BADGE_IDS.DAY_14] : undefined,
     query: { 
-      enabled: !!address,
+      enabled: !!address && isCorrectChain,
       refetchInterval: 10000,
       refetchOnWindowFocus: true,
     },
@@ -130,7 +133,7 @@ export default function BadgesPage() {
 
   // Force refetch when address changes
   useEffect(() => {
-    if (address) {
+    if (address && isCorrectChain) {
       // Small delay to ensure wallet is connected
       const timer = setTimeout(() => {
         refetchStreak();
@@ -141,7 +144,7 @@ export default function BadgesPage() {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [address, refetchStreak, refetchBadge1, refetchBadge3, refetchBadge7, refetchBadge14]);
+  }, [address, isCorrectChain, refetchStreak, refetchBadge1, refetchBadge3, refetchBadge7, refetchBadge14]);
 
   return (
     <div className={styles.container}>
@@ -153,6 +156,11 @@ export default function BadgesPage() {
       <img src="/sphere.png" alt="" className={styles.decorativeSphere6} aria-hidden="true" />
       <img src="/sphere.png" alt="" className={styles.decorativeSphere7} aria-hidden="true" />
       <img src="/sphere.png" alt="" className={styles.decorativeSphere8} aria-hidden="true" />
+      {address && !isCorrectChain && (
+        <div style={{ width: "100%", textAlign: "center", opacity: 0.8, marginBottom: "1rem" }}>
+          Wrong network. Switch to chainId {expectedChainId}.
+        </div>
+      )}
       <div className={styles.header}>
         <h1 className={styles.title}>Badges</h1>
         <p className={styles.subtitle}>Earn badges by maintaining your streak</p>

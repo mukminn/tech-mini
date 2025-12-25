@@ -1,13 +1,17 @@
 ﻿"use client";
 import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
+import { useAccount, useChainId, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "../lib/contract";
 import styles from "./page.module.css";
 
 export default function Home() {
   const { isFrameReady, setFrameReady, context } = useMiniKit();
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const expectedChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 8453;
+  const isCorrectChain = chainId === expectedChainId;
+  const activityKey = address ? `activities_${address.toLowerCase()}` : "";
   const [streak, setStreak] = useState(0);
   const [lastCheckIn, setLastCheckIn] = useState<Date | null>(null);
   const [canCheckIn, setCanCheckIn] = useState(false);
@@ -28,7 +32,7 @@ export default function Home() {
     functionName: "canCheckInToday",
     args: address ? [address] : undefined,
     query: {
-      enabled: !!address,
+      enabled: !!address && isCorrectChain,
       refetchInterval: 10000, // Refetch every 10 seconds
       refetchOnWindowFocus: true,
     },
@@ -40,7 +44,7 @@ export default function Home() {
     functionName: "getStreak",
     args: address ? [address] : undefined,
     query: {
-      enabled: !!address,
+      enabled: !!address && isCorrectChain,
       refetchInterval: 10000, // Refetch every 10 seconds
       refetchOnWindowFocus: true,
     },
@@ -52,7 +56,7 @@ export default function Home() {
     functionName: "lastCheckInDay",
     args: address ? [address] : undefined,
     query: {
-      enabled: !!address,
+      enabled: !!address && isCorrectChain,
       refetchInterval: 10000, // Refetch every 10 seconds
       refetchOnWindowFocus: true,
     },
@@ -70,7 +74,7 @@ export default function Home() {
 
   // Update local state from contract
   useEffect(() => {
-    if (address) {
+    if (address && isCorrectChain) {
       // Always update canCheckIn, even if false (for new users, this will be true)
       if (canCheckInToday !== undefined && typeof canCheckInToday === 'boolean') {
         setCanCheckIn(canCheckInToday);
@@ -128,7 +132,7 @@ export default function Home() {
 
   // Force refetch when address changes
   useEffect(() => {
-    if (address) {
+    if (address && isCorrectChain) {
       // Small delay to ensure wallet is connected
       const timer = setTimeout(() => {
         refetchCanCheckIn();
@@ -137,7 +141,7 @@ export default function Home() {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [address, refetchCanCheckIn, refetchStreak, refetchLastCheckIn]);
+  }, [address, isCorrectChain, refetchCanCheckIn, refetchStreak, refetchLastCheckIn]);
 
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -146,6 +150,10 @@ export default function Home() {
 
   const handleCheckIn = async () => {
     if (!address || !canCheckIn) return;
+    if (!isCorrectChain) {
+      alert(`Wrong network. Please switch to chainId ${expectedChainId}.`);
+      return;
+    }
 
     try {
       await writeContract({
@@ -186,7 +194,7 @@ export default function Home() {
           message: `Checked in! Day ${estimatedStreak} streak`,
         };
 
-        const existingActivities = localStorage.getItem(`activities_${address}`);
+        const existingActivities = localStorage.getItem(activityKey);
         const activities = existingActivities ? JSON.parse(existingActivities) : [];
         activities.push(activityItem);
 
@@ -210,7 +218,7 @@ export default function Home() {
           activities.push(badgeActivity);
         }
 
-        localStorage.setItem(`activities_${address}`, JSON.stringify(activities));
+        localStorage.setItem(activityKey, JSON.stringify(activities));
 
         try {
           window.dispatchEvent(new Event("activities_updated"));
@@ -234,7 +242,7 @@ export default function Home() {
 
       saveActivity();
     }
-  }, [isSuccess, address, hash, streak, refetchCanCheckIn, refetchStreak, refetchLastCheckIn]);
+  }, [isSuccess, address, activityKey, hash, isCorrectChain, streak, refetchCanCheckIn, refetchStreak, refetchLastCheckIn]);
 
   const getNextBadge = () => {
     if (streak >= 14) return null;
@@ -257,6 +265,18 @@ export default function Home() {
       <img src="/sphere.png" alt="" className={styles.decorativeSphere7} aria-hidden="true" />
       <img src="/sphere.png" alt="" className={styles.decorativeSphere8} aria-hidden="true" />
       <div className={styles.content}>
+        {!address && (
+          <div style={{ width: "100%", textAlign: "center", opacity: 0.75 }}>
+            Waiting for wallet auto-connect…
+          </div>
+        )}
+
+        {address && !isCorrectChain && (
+          <div style={{ width: "100%", textAlign: "center", opacity: 0.8 }}>
+            Wrong network. Switch to chainId {expectedChainId}.
+          </div>
+        )}
+
         <div className={styles.header}>
           <h1 className={styles.greeting}>
             Hey {context?.user?.displayName || "there"}!

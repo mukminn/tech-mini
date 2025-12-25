@@ -1,14 +1,21 @@
 "use client";
 import { ReactNode } from "react";
-import { base } from "wagmi/chains";
+import { base, baseSepolia } from "wagmi/chains";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import "@coinbase/onchainkit/styles.css";
 
 export function RootProvider({ children }: { children: ReactNode }) {
+  const configuredChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID);
+  const configuredChain = (process.env.NEXT_PUBLIC_CHAIN || "").toLowerCase();
+  const chain =
+    configuredChainId === baseSepolia.id || configuredChain === "basesepolia"
+      ? baseSepolia
+      : base;
+
   return (
     <OnchainKitProvider
       apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-      chain={base}
+      chain={chain}
       config={{
         appearance: {
           mode: "auto",

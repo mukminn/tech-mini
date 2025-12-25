@@ -14,12 +14,13 @@ interface ActivityItem {
 export default function ActivityPage() {
   const { address } = useAccount();
   const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const activityKey = address ? `activities_${address.toLowerCase()}` : "";
 
   // Load activities from localStorage when address is available
   useEffect(() => {
     const loadActivities = () => {
       if (address) {
-        const stored = localStorage.getItem(`activities_${address}`);
+        const stored = localStorage.getItem(activityKey);
         if (stored) {
           try {
             const parsed: ActivityItem[] = JSON.parse(stored).map((item: { id: string; date: string; type: string; message: string; badgeName?: string }) => ({
@@ -53,7 +54,7 @@ export default function ActivityPage() {
     };
     const handleStorage = (e: StorageEvent) => {
       if (!address) return;
-      if (e.key === `activities_${address}`) loadActivities();
+      if (e.key === activityKey) loadActivities();
     };
     const handleActivitiesUpdated = () => {
       loadActivities();
@@ -68,7 +69,7 @@ export default function ActivityPage() {
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('activities_updated', handleActivitiesUpdated as EventListener);
     };
-  }, [address]);
+  }, [address, activityKey]);
 
   if (activities.length === 0) {
     return (
