@@ -7,8 +7,6 @@ import styles from "./page.module.css";
 
 export default function Home() {
   const { isFrameReady, setFrameReady, context } = useMiniKit();
-  const [debug, setDebug] = useState(false);
-  const [clientInfo, setClientInfo] = useState<{ href: string; userAgent: string } | null>(null);
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const expectedChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 8453;
@@ -22,20 +20,36 @@ export default function Home() {
 
   // Initialize the miniapp
   useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
-  }, [setFrameReady, isFrameReady]);
+    // Call on mount to ensure Warpcast/Farcaster finishes initialization.
+    // Some clients can report isFrameReady=true before wallet injection completes.
+    setFrameReady();
+  }, [setFrameReady]);
 
+  // Retry frame-ready briefly if wallet address hasn't been injected yet.
   useEffect(() => {
-    try {
-      setDebug(new URLSearchParams(window.location.search).get("debug") === "1");
-      setClientInfo({ href: window.location.href, userAgent: navigator.userAgent });
-    } catch {
-      setDebug(false);
-      setClientInfo(null);
-    }
-  }, []);
+    if (address) return;
+
+    let attempts = 0;
+    const maxAttempts = 4;
+    const intervalMs = 800;
+
+    const interval = setInterval(() => {
+      attempts += 1;
+      try {
+        setFrameReady();
+      } catch {
+        // ignore
+      }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+      }
+    }, intervalMs);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [address, setFrameReady]);
 
   // Read contract state with refetch interval
   const { data: canCheckInToday, refetch: refetchCanCheckIn } = useReadContract({
@@ -277,35 +291,6 @@ export default function Home() {
       <img src="/sphere.png" alt="" className={styles.decorativeSphere7} aria-hidden="true" />
       <img src="/sphere.png" alt="" className={styles.decorativeSphere8} aria-hidden="true" />
       <div className={styles.content}>
-        {debug && (
-          <div style={{ width: "100%", fontSize: 12, opacity: 0.85 }}>
-            <div>debug=1</div>
-            <div>isFrameReady: {String(isFrameReady)}</div>
-            <div>hasApiKey: {String(Boolean(process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY))}</div>
-            <div>address: {address ? address : "(none)"}</div>
-            <div>isConnected: {String(isConnected)}</div>
-            <div>chainId: {String(chainId)}</div>
-            <div>expectedChainId: {String(expectedChainId)}</div>
-            <div>isCorrectChain: {String(isCorrectChain)}</div>
-            <div>context.user.displayName: {context?.user?.displayName ?? "(none)"}</div>
-            <div>context.user.fid: {context?.user?.fid ?? "(none)"}</div>
-            <div>href: {clientInfo?.href ?? "(none)"}</div>
-            <div>userAgent: {clientInfo?.userAgent ?? "(none)"}</div>
-          </div>
-        )}
-
-        {!address && (
-          <div style={{ width: "100%", textAlign: "center", opacity: 0.75 }}>
-            Waiting for wallet auto-connect…
-          </div>
-        )}
-
-        {address && !isCorrectChain && (
-          <div style={{ width: "100%", textAlign: "center", opacity: 0.8 }}>
-            Wrong network. Switch to chainId {expectedChainId}.
-          </div>
-        )}
-
         <div className={styles.header}>
           <h1 className={styles.greeting}>
             Hey {context?.user?.displayName || "there"}!
