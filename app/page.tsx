@@ -20,36 +20,50 @@ export default function Home() {
 
   // Initialize the miniapp
   useEffect(() => {
-    // Call on mount to ensure Warpcast/Farcaster finishes initialization.
-    // Some clients can report isFrameReady=true before wallet injection completes.
-    setFrameReady();
-  }, [setFrameReady]);
-
-  // Retry frame-ready briefly if wallet address hasn't been injected yet.
-  useEffect(() => {
-    if (address) return;
-
-    let attempts = 0;
-    const maxAttempts = 4;
-    const intervalMs = 800;
-
-    const interval = setInterval(() => {
-      attempts += 1;
+    // Delay init slightly so Warpcast/Farcaster has time to finish setting up.
+    const t = setTimeout(() => {
       try {
         setFrameReady();
       } catch {
         // ignore
       }
-
-      if (attempts >= maxAttempts) {
-        clearInterval(interval);
-      }
-    }, intervalMs);
+    }, 700);
 
     return () => {
-      clearInterval(interval);
+      clearTimeout(t);
     };
-  }, [address, setFrameReady]);
+  }, [setFrameReady]);
+
+  // Retry frame-ready briefly if wallet address hasn't been injected yet.
+  useEffect(() => {
+    if (address || isConnected) return;
+
+    let attempts = 0;
+    const maxAttempts = 5;
+    const intervalMs = 1500;
+
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const startDelay = setTimeout(() => {
+      interval = setInterval(() => {
+        attempts += 1;
+        try {
+          setFrameReady();
+        } catch {
+          // ignore
+        }
+
+        if (attempts >= maxAttempts) {
+          if (interval) clearInterval(interval);
+        }
+      }, intervalMs);
+    }, 1200);
+
+    return () => {
+      clearTimeout(startDelay);
+      if (interval) clearInterval(interval);
+    };
+  }, [address, isConnected, setFrameReady]);
 
   // Read contract state with refetch interval
   const { data: canCheckInToday, refetch: refetchCanCheckIn } = useReadContract({
