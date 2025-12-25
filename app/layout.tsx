@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
           },
         },
       }),
-      "base:app_id": "693b0f4c8a7c4e55fec73e83",
+      "base:app_id": "694a77d0c63ad876c908102c",
     },
     metadataBase: new URL(baseUrl),
     openGraph: {
@@ -69,16 +69,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <RootProvider>
-      <html lang="en">
-        <body className={`${inter.variable} ${sourceCodePro.variable}`}>
+    <html lang="en">
+      <body className={`${inter.variable} ${sourceCodePro.variable}`}>
+        <RootProvider>
           <AnimatedBackground />
           <SafeArea>
             {children}
             <BottomNav />
           </SafeArea>
-        </body>
-      </html>
-    </RootProvider>
+        </RootProvider>
+      </body>
+    </html>
   );
 }
