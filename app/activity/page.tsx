@@ -46,21 +46,27 @@ export default function ActivityPage() {
 
     // Load immediately when address changes
     loadActivities();
-    
-    // Refresh every 3 seconds
-    const interval = setInterval(() => {
-      loadActivities();
-    }, 3000);
 
     // Also refresh when window gets focus (user switches back to tab)
     const handleFocus = () => {
       loadActivities();
     };
+    const handleStorage = (e: StorageEvent) => {
+      if (!address) return;
+      if (e.key === `activities_${address}`) loadActivities();
+    };
+    const handleActivitiesUpdated = () => {
+      loadActivities();
+    };
+
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('activities_updated', handleActivitiesUpdated as EventListener);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('activities_updated', handleActivitiesUpdated as EventListener);
     };
   }, [address]);
 

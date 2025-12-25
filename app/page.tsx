@@ -212,16 +212,29 @@ export default function Home() {
 
         localStorage.setItem(`activities_${address}`, JSON.stringify(activities));
 
-        // Trigger page refresh to show updated data
-        // Use a shorter delay to ensure localStorage is saved
+        try {
+          window.dispatchEvent(new Event("activities_updated"));
+        } catch {
+          // ignore
+        }
+
+        setCanCheckIn(false);
+        setStreak((prev) => {
+          setPreviousStreak(prev);
+          return Math.max(prev, estimatedStreak);
+        });
+        setLastCheckIn(new Date());
+
         setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+          refetchCanCheckIn();
+          refetchStreak();
+          refetchLastCheckIn();
+        }, 600);
       };
 
       saveActivity();
     }
-  }, [isSuccess, address, hash, streak]);
+  }, [isSuccess, address, hash, streak, refetchCanCheckIn, refetchStreak, refetchLastCheckIn]);
 
   const getNextBadge = () => {
     if (streak >= 14) return null;
