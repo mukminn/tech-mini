@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
           },
         },
       }),
-      "base:app_id": "694efc9a4d3a403912ed8156",
+      "base:app_id": "694fc1a34d3a403912ed822d",
     },
     metadataBase: new URL(baseUrl),
     openGraph: {
