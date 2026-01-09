@@ -70,6 +70,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="stylesheet" href="/butterfly-overlay.css" />
+        <script src="/butterfly-overlay.js" defer />
+      </head>
       <body className={`${inter.variable} ${sourceCodePro.variable}`}>
         <RootProvider>
           <AnimatedBackground />

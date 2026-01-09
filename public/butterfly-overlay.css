@@ -1,0 +1,1 @@
+#butterfly-overlay{position:fixed;inset:0;z-index:2147483646;pointer-events:none;overflow:hidden;contain:layout style paint}#butterfly-overlay .bf{position:absolute;left:0;top:0;will-change:transform;transform:translate3d(0,0,0)}#butterfly-overlay .bf svg{display:block;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18))}
