@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useAccount, useChainId, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "../lib/contract";
@@ -15,8 +15,8 @@ export default function Home() {
   const [streak, setStreak] = useState(0);
   const [lastCheckIn, setLastCheckIn] = useState<Date | null>(null);
   const [canCheckIn, setCanCheckIn] = useState(false);
-  const [previousStreak, setPreviousStreak] = useState(0);
   const [checkInFee, setCheckInFee] = useState<bigint>(BigInt(0));
+  const lastSavedTxHashRef = useRef<`0x${string}` | null>(null);
 
   // Read contract state with refetch interval
   const { data: canCheckInToday, refetch: refetchCanCheckIn } = useReadContract({
@@ -80,16 +80,12 @@ export default function Home() {
       if (contractStreak !== undefined && contractStreak !== null) {
         const newStreak = Number(contractStreak);
         // Only update previousStreak if streak actually changed
-        setStreak((prevStreak) => {
-          if (newStreak !== prevStreak) {
-            setPreviousStreak(prevStreak);
-          }
+        setStreak((_prevStreak) => {
           return newStreak;
         });
       } else {
         // For new users, set to 0 explicitly
         setStreak(0);
-        setPreviousStreak(0);
       }
       
       // Update last check-in date
@@ -109,7 +105,6 @@ export default function Home() {
     } else {
       // Reset when no address
       setStreak(0);
-      setPreviousStreak(0);
       setLastCheckIn(null);
       setCanCheckIn(false);
     }
@@ -121,7 +116,7 @@ export default function Home() {
       // Default fee if not loaded yet
       setCheckInFee(BigInt(0));
     }
-  }, [address, canCheckInToday, contractStreak, lastCheckInTimestamp, fee]);
+  }, [address, canCheckInToday, contractStreak, lastCheckInTimestamp, fee, isCorrectChain]);
 
   // Force refetch when address changes
   useEffect(() => {
@@ -170,6 +165,8 @@ export default function Home() {
   // Save activity and refresh data after successful transaction
   useEffect(() => {
     if (isSuccess && address && hash) {
+      if (lastSavedTxHashRef.current === hash) return;
+      lastSavedTxHashRef.current = hash;
       // Wait for contract state to update (blockchain confirmation)
       const saveActivity = async () => {
         // Wait longer for contract state to be confirmed
@@ -184,12 +181,16 @@ export default function Home() {
           id: `checkin-${Date.now()}-${hash}`,
           date: new Date().toISOString(),
           type: "checkin" as const,
+          txHash: hash,
           message: `Checked in! Day ${estimatedStreak} streak`,
         };
 
         const existingActivities = localStorage.getItem(activityKey);
         const activities = existingActivities ? JSON.parse(existingActivities) : [];
-        activities.push(activityItem);
+        const alreadyHasTx = Array.isArray(activities)
+          ? activities.some((a: any) => a?.txHash === hash && a?.type === "checkin")
+          : false;
+        if (!alreadyHasTx) activities.push(activityItem);
 
         // Check if badge was earned (milestone days: 1, 3, 7, 14)
         const badgeMilestones = [1, 3, 7, 14];
@@ -205,10 +206,14 @@ export default function Home() {
             id: `badge-${Date.now()}-${estimatedStreak}`,
             date: new Date().toISOString(),
             type: "badge" as const,
+            txHash: hash,
             message: `🏆 Earned badge: ${badgeNames[estimatedStreak]}!`,
             badgeName: badgeNames[estimatedStreak],
           };
-          activities.push(badgeActivity);
+          const alreadyHasBadgeTx = Array.isArray(activities)
+            ? activities.some((a: any) => a?.txHash === hash && a?.type === "badge")
+            : false;
+          if (!alreadyHasBadgeTx) activities.push(badgeActivity);
         }
 
         localStorage.setItem(activityKey, JSON.stringify(activities));
@@ -221,7 +226,6 @@ export default function Home() {
 
         setCanCheckIn(false);
         setStreak((prev) => {
-          setPreviousStreak(prev);
           return Math.max(prev, estimatedStreak);
         });
         setLastCheckIn(new Date());

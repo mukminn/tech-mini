@@ -37,7 +37,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
         try {
           const provider = await sdk.wallet.getEthereumProvider();
           if (provider) {
-            (window as any).ethereum = provider;
+            (window as { ethereum?: unknown }).ethereum = provider;
             setProviderKey((k) => k + 1);
             return;
           }
