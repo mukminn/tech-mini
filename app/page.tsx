@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useAccount, useChainId, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "../lib/contract";
+import { encodeFunctionData } from "viem";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -12,11 +13,47 @@ export default function Home() {
   const expectedChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 8453;
   const isCorrectChain = chainId === expectedChainId;
   const activityKey = address ? `activities_${address.toLowerCase()}` : "";
+  const TOKEN_ADDRESS = "0xEF5997c2cf2f6c138196f8A6203afc335206b3c1" as const;
+  const DEFAULT_TOKEN_RECIPIENT = "0xc76b7F5BC0FDeD34c035f4dF38A8A771E4FEb87A" as const;
+  const PAYMASTER_URL = "https://paymaster.base.org/api/v1/sponsor" as const;
+
+  const ERC20_ABI = [
+    {
+      type: "function",
+      name: "transfer",
+      stateMutability: "nonpayable",
+      inputs: [
+        { name: "to", type: "address" },
+        { name: "amount", type: "uint256" },
+      ],
+      outputs: [{ name: "", type: "bool" }],
+    },
+    {
+      type: "function",
+      name: "decimals",
+      stateMutability: "view",
+      inputs: [],
+      outputs: [{ name: "", type: "uint8" }],
+    },
+    {
+      type: "function",
+      name: "symbol",
+      stateMutability: "view",
+      inputs: [],
+      outputs: [{ name: "", type: "string" }],
+    },
+  ] as const;
+
   const [streak, setStreak] = useState(0);
   const [lastCheckIn, setLastCheckIn] = useState<Date | null>(null);
   const [canCheckIn, setCanCheckIn] = useState(false);
   const [checkInFee, setCheckInFee] = useState<bigint>(BigInt(0));
   const lastSavedTxHashRef = useRef<`0x${string}` | null>(null);
+
+  const [tokenRecipient, setTokenRecipient] = useState<string>(DEFAULT_TOKEN_RECIPIENT);
+  const [isSendingToken, setIsSendingToken] = useState(false);
+  const [tokenTxHash, setTokenTxHash] = useState<string | null>(null);
+  const [tokenError, setTokenError] = useState<string | null>(null);
 
   // Read contract state with refetch interval
   const { data: canCheckInToday, refetch: refetchCanCheckIn } = useReadContract({
@@ -62,6 +99,26 @@ export default function Home() {
     functionName: "getCheckInFee",
     query: {
       enabled: true,
+    },
+  });
+
+  const { data: tokenDecimals } = useReadContract({
+    address: TOKEN_ADDRESS,
+    abi: ERC20_ABI,
+    functionName: "decimals",
+    query: {
+      enabled: true,
+      staleTime: 60_000,
+    },
+  });
+
+  const { data: tokenSymbol } = useReadContract({
+    address: TOKEN_ADDRESS,
+    abi: ERC20_ABI,
+    functionName: "symbol",
+    query: {
+      enabled: true,
+      staleTime: 60_000,
     },
   });
 
@@ -159,6 +216,74 @@ export default function Home() {
       } else {
         alert("Transaction failed. Please try again.");
       }
+    }
+  };
+
+  const handleSendToken = async () => {
+    if (!address) return;
+    if (!isCorrectChain) {
+      alert(`Wrong network. Please switch to chainId ${expectedChainId}.`);
+      return;
+    }
+
+    setTokenError(null);
+    setTokenTxHash(null);
+
+    const decimalsNumber = typeof tokenDecimals === "number" ? tokenDecimals : Number(tokenDecimals ?? 18);
+    const amount = BigInt(10) ** BigInt(decimalsNumber);
+    const to = tokenRecipient?.trim();
+
+    if (!to || !/^0x[a-fA-F0-9]{40}$/.test(to)) {
+      setTokenError("Recipient address invalid.");
+      return;
+    }
+
+    const provider = (window as unknown as { ethereum?: any }).ethereum;
+    if (!provider?.request) {
+      setTokenError("Sponsored wallet provider not available.");
+      return;
+    }
+
+    setIsSendingToken(true);
+    try {
+      const data = encodeFunctionData({
+        abi: ERC20_ABI,
+        functionName: "transfer",
+        args: [to as `0x${string}`, amount],
+      });
+
+      const calls = [
+        {
+          to: TOKEN_ADDRESS,
+          data,
+          value: "0x0",
+        },
+      ];
+
+      const res = await provider.request({
+        method: "wallet_sendCalls",
+        params: [
+          {
+            version: "1.0",
+            from: address,
+            calls,
+            capabilities: {
+              paymasterUrl: PAYMASTER_URL,
+            },
+          },
+        ],
+      });
+
+      if (typeof res === "string") {
+        setTokenTxHash(res);
+      } else {
+        setTokenTxHash("sent");
+      }
+    } catch (e: any) {
+      const msg = typeof e?.message === "string" ? e.message : "Token send failed.";
+      setTokenError(msg);
+    } finally {
+      setIsSendingToken(false);
     }
   };
 
@@ -321,6 +446,45 @@ export default function Home() {
             ✅ Check-in successful! Keep your streak going!
           </div>
         )}
+
+        <div style={{ width: "100%", marginTop: 16 }}>
+          <div style={{ opacity: 0.9, fontSize: 12, marginBottom: 8 }}>
+            Send 1 {(typeof tokenSymbol === "string" && tokenSymbol) || "TOKEN"}
+          </div>
+          <input
+            value={tokenRecipient}
+            onChange={(e) => setTokenRecipient(e.target.value)}
+            placeholder={DEFAULT_TOKEN_RECIPIENT}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,0.14)",
+              background: "rgba(0,0,0,0.18)",
+              color: "inherit",
+              outline: "none",
+              marginBottom: 10,
+            }}
+          />
+          <button
+            onClick={handleSendToken}
+            disabled={!isConnected || !isCorrectChain || isSendingToken}
+            className={`${styles.checkInButton} ${!isConnected ? styles.disabled : ""}`}
+            style={{ marginTop: 0 }}
+          >
+            {isSendingToken ? "Sending (Sponsored)..." : "Send 1 Token (Sponsored)"}
+          </button>
+          {tokenTxHash && (
+            <div className={styles.successMessage} style={{ marginTop: 10 }}>
+              ✅ Token sent!
+            </div>
+          )}
+          {tokenError && (
+            <div style={{ marginTop: 10, color: "#ffb4b4", fontSize: 12 }}>
+              {tokenError}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
