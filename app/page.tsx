@@ -193,12 +193,48 @@ export default function Home() {
     hash,
   });
 
-  const handleCheckIn = async () => {
-    if (!address || !canCheckIn) return;
-    if (!isCorrectChain) {
+  const requestConnect = async () => {
+    const provider = (window as unknown as { ethereum?: any }).ethereum;
+    if (!provider?.request) {
+      alert("Wallet provider not available.");
+      return false;
+    }
+    try {
+      await provider.request({ method: "eth_requestAccounts", params: [] });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const requestSwitchNetwork = async () => {
+    const provider = (window as unknown as { ethereum?: any }).ethereum;
+    if (!provider?.request) {
+      alert("Wallet provider not available.");
+      return false;
+    }
+    try {
+      await provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: `0x${expectedChainId.toString(16)}` }],
+      });
+      return true;
+    } catch {
       alert(`Wrong network. Please switch to chainId ${expectedChainId}.`);
+      return false;
+    }
+  };
+
+  const handleCheckIn = async () => {
+    if (!isConnected) {
+      await requestConnect();
       return;
     }
+    if (!isCorrectChain) {
+      await requestSwitchNetwork();
+      return;
+    }
+    if (!address || !canCheckIn) return;
 
     try {
       await writeContract({
@@ -220,11 +256,15 @@ export default function Home() {
   };
 
   const handleSendToken = async () => {
-    if (!address) return;
-    if (!isCorrectChain) {
-      alert(`Wrong network. Please switch to chainId ${expectedChainId}.`);
+    if (!isConnected) {
+      await requestConnect();
       return;
     }
+    if (!isCorrectChain) {
+      await requestSwitchNetwork();
+      return;
+    }
+    if (!address) return;
 
     setTokenError(null);
     setTokenTxHash(null);
@@ -431,11 +471,15 @@ export default function Home() {
 
         <button
           onClick={handleCheckIn}
-          disabled={!canCheckIn || !isConnected || isPending || isConfirming}
+          disabled={isPending || isConfirming}
           className={`${styles.checkInButton} ${!canCheckIn ? styles.disabled : ""}`}
         >
           {isPending || isConfirming
             ? "Processing..."
+            : !isConnected
+            ? "Connect Wallet"
+            : !isCorrectChain
+            ? "Switch Network"
             : !canCheckIn
             ? "Already Checked In Today"
             : "Complete Today"}
@@ -468,11 +512,17 @@ export default function Home() {
           />
           <button
             onClick={handleSendToken}
-            disabled={!isConnected || !isCorrectChain || isSendingToken}
+            disabled={isSendingToken}
             className={`${styles.checkInButton} ${!isConnected ? styles.disabled : ""}`}
             style={{ marginTop: 0 }}
           >
-            {isSendingToken ? "Sending (Sponsored)..." : "Send 1 Token (Sponsored)"}
+            {isSendingToken
+              ? "Sending (Sponsored)..."
+              : !isConnected
+              ? "Connect Wallet"
+              : !isCorrectChain
+              ? "Switch Network"
+              : "Send 1 Token (Sponsored)"}
           </button>
           {tokenTxHash && (
             <div className={styles.successMessage} style={{ marginTop: 10 }}>
