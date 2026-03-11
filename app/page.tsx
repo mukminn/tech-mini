@@ -30,6 +30,13 @@ export default function Home() {
     },
     {
       type: "function",
+      name: "balanceOf",
+      stateMutability: "view",
+      inputs: [{ name: "account", type: "address" }],
+      outputs: [{ name: "", type: "uint256" }],
+    },
+    {
+      type: "function",
       name: "decimals",
       stateMutability: "view",
       inputs: [],
@@ -119,6 +126,18 @@ export default function Home() {
     query: {
       enabled: true,
       staleTime: 60_000,
+    },
+  });
+
+  const { data: tokenBalance } = useReadContract({
+    address: TOKEN_ADDRESS,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: [address as `0x${string}`],
+    query: {
+      enabled: !!address,
+      staleTime: 15_000,
+      refetchInterval: 15_000,
     },
   });
 
@@ -273,6 +292,18 @@ export default function Home() {
     const amount = BigInt(10) ** BigInt(decimalsNumber);
     const to = tokenRecipient?.trim();
 
+    try {
+      const bal = (tokenBalance ?? BigInt(0)) as bigint;
+      if (bal < amount) {
+        setTokenError(
+          `Insufficient ${(typeof tokenSymbol === "string" && tokenSymbol) || "token"} balance. Need 1 token.`
+        );
+        return;
+      }
+    } catch {
+      // ignore; proceed
+    }
+
     if (!to || !/^0x[a-fA-F0-9]{40}$/.test(to)) {
       setTokenError("Recipient address invalid.");
       return;
@@ -320,8 +351,19 @@ export default function Home() {
         setTokenTxHash("sent");
       }
     } catch (e: any) {
-      const msg = typeof e?.message === "string" ? e.message : "Token send failed.";
-      setTokenError(msg);
+      const msg =
+        typeof e?.shortMessage === "string"
+          ? e.shortMessage
+          : typeof e?.message === "string"
+          ? e.message
+          : "Token send failed.";
+      if (typeof msg === "string" && /wallet_sendCalls|method not found|does not exist/i.test(msg)) {
+        setTokenError("Wallet does not support sponsored calls in this environment.");
+      } else if (typeof msg === "string" && /paymaster|sponsor|not authorized|rejected/i.test(msg)) {
+        setTokenError("Sponsored gas rejected by paymaster.");
+      } else {
+        setTokenError(msg);
+      }
     } finally {
       setIsSendingToken(false);
     }
