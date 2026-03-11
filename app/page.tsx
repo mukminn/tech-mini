@@ -212,9 +212,19 @@ export default function Home() {
     hash,
   });
 
+  const waitForProvider = async (timeoutMs = 3000) => {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const provider = (window as unknown as { ethereum?: any }).ethereum;
+      if (provider?.request) return provider;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    return null;
+  };
+
   const requestConnect = async () => {
-    const provider = (window as unknown as { ethereum?: any }).ethereum;
-    if (!provider?.request) {
+    const provider = await waitForProvider();
+    if (!provider) {
       alert("Wallet provider not available.");
       return false;
     }
@@ -227,8 +237,8 @@ export default function Home() {
   };
 
   const requestSwitchNetwork = async () => {
-    const provider = (window as unknown as { ethereum?: any }).ethereum;
-    if (!provider?.request) {
+    const provider = await waitForProvider();
+    if (!provider) {
       alert("Wallet provider not available.");
       return false;
     }
@@ -309,8 +319,8 @@ export default function Home() {
       return;
     }
 
-    const provider = (window as unknown as { ethereum?: any }).ethereum;
-    if (!provider?.request) {
+    const provider = await waitForProvider();
+    if (!provider) {
       setTokenError("Sponsored wallet provider not available.");
       return;
     }
